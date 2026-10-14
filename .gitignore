@@ -1,0 +1,26 @@
+# ── ข้อมูลส่วนตัว: ห้าม commit เด็ดขาด (token มีเลขประจำตัวผู้ใช้อยู่ข้างใน) ──
+Access_Key.txt
+.env
+
+# ── ข้อมูลที่ดาวน์โหลด/สร้างจาก code (สร้างใหม่ได้) ──
+cache/
+output/
+
+# ── ไฟล์ขอบเขตของแต่ละคน (เก็บไว้แค่โฟลเดอร์) ──
+areas/*
+!areas/.gitkeep
+
+# ── ข้อมูลและโปรเจกต์เดิมที่ไม่เผยแพร่ ──
+input/
+legacy/
+*.qgz
+*.qgz.bak
+*.qgs~
+
+# ── Python / Jupyter ──
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
