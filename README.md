@@ -18,7 +18,7 @@ areas/my_site.kmz  ──►  python fetch_parcels.py  ──►  output/my_site
 ## Workspace
 
 ```
-landsmaps-parcels/
+LandParcels/
 │
 ├── areas/                  ◄── ① วางไฟล์ขอบเขตพื้นที่ของคุณที่นี่
 │   └── my_site.kmz             (ชื่อไฟล์ = ชื่อโฟลเดอร์/ไฟล์ผลลัพธ์)
@@ -59,7 +59,29 @@ landsmaps-parcels/
 
 ## เริ่มใช้งาน
 
-### 1. ติดตั้ง (ครั้งเดียว)
+### 1. ดาวน์โหลดโปรเจกต์ (clone)
+
+ต้องติดตั้ง [Git](https://git-scm.com/downloads) ก่อน แล้วเปิดโปรแกรม shell สำหรับพิมพ์คำสั่ง:
+
+| ระบบ | โปรแกรม shell ที่ใช้ |
+|---|---|
+| Windows | **PowerShell** (กด Start พิมพ์ `PowerShell`) หรือ **Git Bash** (ติดตั้งมาพร้อม Git for Windows) หรือ Terminal ใน VS Code (`` Ctrl+` ``) |
+| macOS / Linux | **Terminal** |
+
+พิมพ์คำสั่งต่อไปนี้ทีละบรรทัด:
+
+```bash
+cd D:\Projects                                        # ไปยังโฟลเดอร์ที่จะเก็บโปรเจกต์ (macOS/Linux เช่น cd ~/Projects)
+git clone https://github.com/ParqeJ/LandParcels.git   # ดาวน์โหลดโปรเจกต์
+cd LandParcels                                        # เข้าไปในโฟลเดอร์โปรเจกต์
+```
+
+คำสั่งในขั้นถัด ๆ ไปทั้งหมด ให้รันใน shell เดียวกันนี้ ขณะอยู่ในโฟลเดอร์ `LandParcels`
+
+- **ไม่มี Git?** เปิด https://github.com/ParqeJ/LandParcels กดปุ่ม **Code → Download ZIP** แล้วแตกไฟล์ จากนั้น `cd` เข้าโฟลเดอร์ที่แตกออกมา
+- **อัปเดตเป็นเวอร์ชันล่าสุด** ภายหลัง: รัน `git pull` ในโฟลเดอร์ `LandParcels` (ไฟล์ใน `areas/` `output/` `cache/` จะไม่ถูกแตะ)
+
+### 2. ติดตั้ง (ครั้งเดียว)
 
 ต้องมี Python 3.10 ขึ้นไป
 
@@ -68,8 +90,10 @@ pip install -r requirements.txt
 ```
 
 > ถ้าใช้ Anaconda: `conda install -c conda-forge geopandas pyogrio requests` ก็พอ
+>
+> Windows: ถ้าพิมพ์ `python` / `pip` แล้วไม่เจอคำสั่ง ให้ใช้ `py` และ `py -m pip` แทน
 
-### 2. วางไฟล์ขอบเขต
+### 3. วางไฟล์ขอบเขต
 
 คัดลอกไฟล์พื้นที่ไปไว้ใน `areas/` วางได้หลายไฟล์ ไฟล์ละพื้นที่
 
@@ -84,7 +108,7 @@ pip install -r requirements.txt
 - พิกัดระบบไหนก็ได้ ถ้ามีข้อมูล CRS (`.prj`) จะแปลงให้เอง
 - ชื่อไฟล์จะใช้เป็นชื่อผลลัพธ์ เช่น `Site A.kmz` → `output/site_a/`
 
-### 3. รัน
+### 4. รัน
 
 ```bash
 python fetch_parcels.py
@@ -112,7 +136,7 @@ python fetch_parcels.py
 python fetch_parcels.py examples/sample_area.geojson --no-detail
 ```
 
-### 4. เปิดใน QGIS
+### 5. เปิดใน QGIS
 
 ลาก `.shp` จาก `output/` เข้า QGIS ได้เลย ผลลัพธ์ใช้ CRS ดั้งเดิมของกรมที่ดิน
 
