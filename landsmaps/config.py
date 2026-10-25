@@ -18,12 +18,6 @@ API = "https://landsmaps.dol.go.th/apiService"
 WFS = "https://landsmaps.dol.go.th/geoserver/LANDSMAPS/ows"
 HEADERS = {"User-Agent": "Mozilla/5.0", "Referer": "https://landsmaps.dol.go.th/"}
 JWT_URL = f"{API}/JWT/GetJWTAccessToken"    # token สาธารณะ ไม่ต้องล็อกอิน
-# endpoint ล็อกอิน แยกตามชนิดบัญชี (key = ชื่อ field ที่ต้องส่งคู่กับ user_password)
-LOGIN_URLS = {
-    "mail": f"{API}/LandsMaps/Login",
-    "personal_id": f"{API}/LandsMaps/LoginDepartment",
-    "user_name": f"{API}/LandsMaps/LoginLandofficeAD",
-}
 
 # เข้าสู่ระบบด้วย DGA (OpenID ของบัญชีทางรัฐ) — ลำดับเดียวกับปุ่มในเว็บ (Script/master/master.js: btnopenid)
 #   1. ขอ token สาธารณะ (JWT_URL)

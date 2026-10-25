@@ -19,6 +19,7 @@ from shapely.geometry import shape
 from landsmaps.api import LandsMapsAPI, QuotaExceeded, check_token, read_token
 from landsmaps.config import OUTPUT_DIR, SLEEP_SEC, TIMEOUT, WFS
 from landsmaps.export import detail_row, to_shp
+from landsmaps.keystore import KeyFileError
 from landsmaps.zones import Zone
 
 SEARCH_RADII_M = (50, 500)      # bbox รอบจุด e/n ที่ใช้หารูปแปลง
@@ -67,9 +68,13 @@ def is_ascii_number(text: str) -> bool:
 def main(argv=None) -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     args = parse_args(argv)
-    token = read_token()
-    print(check_token(token))
-    api = LandsMapsAPI(token)
+    try:
+        token = read_token()
+        print(check_token(token))
+        api = LandsMapsAPI(token)
+    except (KeyFileError, QuotaExceeded) as e:      # Access_Key.txt เสีย / token หมดอายุ -> บอกวิธีแก้
+        print(e)
+        return 1
 
     by_zone: dict[int, list] = {}
     for i, no in enumerate(args.parcel_nos, 1):
@@ -81,18 +86,23 @@ def main(argv=None) -> int:
                 continue
             zone = Zone(int(info.get("zone") or 47))
             geom, land_no = get_geometry(info, zone)
+            row = detail_row(land_no, info, no) if geom is not None else None
         except QuotaExceeded as e:
             print(f"หยุด: LandsMaps แจ้ง [{e}]")
             break
         except requests.RequestException as e:      # แปลงนี้พลาด ไม่ทิ้งแปลงที่ได้มาแล้ว
             print(f"ติดต่อ LandsMaps ไม่ได้ ({e}) -> ข้าม")
             continue
+        except (KeyError, TypeError, ValueError) as e:  # ข้อมูลแปลงนี้ไม่ครบ/ผิดรูป ข้ามแค่แปลงนี้
+            print(f"ข้อมูลจาก LandsMaps ไม่ครบ ({type(e).__name__}: {e}) -> ข้าม")
+            continue
         if geom is None:
             print("พบข้อมูลแต่ไม่พบรูปแปลงใน WFS -> ข้าม")
             continue
-        by_zone.setdefault(zone.number, []).append((detail_row(land_no, info, no), geom))
-        print(f"ระวาง {info['utm']}  เลขที่ดิน {land_no}  "
-              f"{info['rai']}-{info['ngan']}-{info['wa']} ไร่  ต.{info['tumbolname']}")
+        by_zone.setdefault(zone.number, []).append((row, geom))
+        print(f"ระวาง {info.get('utm', '-')}  เลขที่ดิน {land_no}  "
+              f"{info.get('rai', '-')}-{info.get('ngan', '-')}-{info.get('wa', '-')} ไร่  "
+              f"ต.{info.get('tumbolname', '-')}")
         time.sleep(SLEEP_SEC)
 
     if not by_zone:
