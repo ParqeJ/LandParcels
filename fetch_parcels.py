@@ -16,7 +16,8 @@ from pathlib import Path
 from landsmaps import run_area
 from landsmaps.api import QuotaExceeded, check_token, read_token
 from landsmaps.area import find_area_files
-from landsmaps.config import AREA_SUFFIXES, AREAS_DIR
+from landsmaps.config import AREA_SUFFIXES, AREAS_DIR, TOKEN_FILE
+from landsmaps.login import LoginError, ensure_token
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -33,6 +34,19 @@ def parse_args(argv=None) -> argparse.Namespace:
     return args
 
 
+def login_or_saved_token() -> str:
+    """ล็อกอินใหม่ ถ้าล็อกอินไม่ผ่านแต่ยังมี token เดิมอยู่ ให้เตือนแล้วใช้ของเดิมต่อ"""
+    try:
+        return ensure_token()
+    except LoginError as e:
+        saved = read_token()
+        if not saved:
+            raise
+        print(f"ล็อกอินอัตโนมัติไม่สำเร็จ: {e}")
+        print(f"  -> ใช้ token เดิมใน {TOKEN_FILE.name} ต่อ")
+        return saved
+
+
 def main(argv=None) -> int:
     sys.stdout.reconfigure(encoding="utf-8")        # แสดงภาษาไทยใน console ของ Windows
     args = parse_args(argv)
@@ -44,8 +58,8 @@ def main(argv=None) -> int:
     fetch_detail = not args.no_detail
     if fetch_detail:
         try:
-            check_token(read_token())               # token หมดอายุ -> แจ้งก่อนเริ่ม ไม่ต้องรอให้พังทุกพื้นที่
-        except QuotaExceeded as e:
+            print(check_token(login_or_saved_token()))
+        except (LoginError, QuotaExceeded) as e:    # แจ้งก่อนเริ่ม ไม่ต้องรอให้พังทุกพื้นที่
             print(f"{e}\nหรือใช้ --no-detail เพื่อดึงแค่รูปแปลง")
             return 1
 
