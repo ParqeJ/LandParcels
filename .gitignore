@@ -1,5 +1,6 @@
 # ── ข้อมูลส่วนตัว: ห้าม commit เด็ดขาด (token มีเลขประจำตัวผู้ใช้อยู่ข้างใน) ──
 Access_Key.txt
+Access_Key.json
 .env
 
 # ── ข้อมูลที่ดาวน์โหลด/สร้างจาก code (สร้างใหม่ได้) ──
@@ -22,5 +23,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .pytest_cache/
+.coverage
 .venv/
 venv/
