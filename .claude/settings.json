@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest tests/:*)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -c \"import geopandas*\")",
+      "Bash(python -c \"import shapely*\")",
+      "Bash(python -c \"import fiona*\")",
+      "Bash(python -c \"import pyogrio*\")",
+      "Bash(python --version)",
+      "Bash(pip show:*)",
+      "Bash(pip list:*)"
+    ],
+    "ask": [
+      "Bash(python fetch_parcels.py*)",
+      "Bash(python get_token.py*)",
+      "Bash(python search_parcel.py*)",
+      "Bash(python Program_fetch_parcel.cmd*)",
+      "Edit(**/landsmaps/export.py)",
+      "Edit(**/landsmaps/zones.py)",
+      "Edit(**/landsmaps/config.py)",
+      "Edit(**/requirements.txt)"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/Access_Key.txt)",
+      "Read(**/areas/**)",
+      "Read(**/output/**)",
+      "Read(**/cache/**)",
+      "Write(**/.env)",
+      "Write(**/Access_Key.txt)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"D:/ANISPOWER/.claude/hooks/format_python.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
