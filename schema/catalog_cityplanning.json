@@ -1,0 +1,57 @@
+{
+  "section": "cityplanning",
+  "description": "ฟิลด์ดิบจาก ArcGIS FeatureService ของผังเมือง (outFields=*) ที่ fetch_cityplanning.py ดึง",
+  "fixed_fields": [
+    "PL_USE", "PL_USE_TH", "ZONE_HEX", "FAR_MAX", "BCR_MAX", "DENS_H", "DENS_L",
+    "PLAN_NAME", "YEAR", "PROVINCE", "AREA_RAI", "SRC_LAYER"
+  ],
+  "groups": [
+    {
+      "name": "รหัสผังเมือง",
+      "fields": [
+        {"source": "props.PL_USE", "label": "pl_use_raw", "desc": "รหัสการใช้ประโยชน์ที่ดิน (int)", "type": "int", "example": "1"},
+        {"source": "props.PL_NAME", "label": "pl_name", "desc": "ชื่อประเภทการใช้ประโยชน์", "type": "str"},
+        {"source": "props.PL_CODE", "label": "pl_code", "desc": "รหัสย่อยถ้ามี", "type": "str"}
+      ]
+    },
+    {
+      "name": "ค่าควบคุม (FAR/BCR/ความหนาแน่น)",
+      "fields": [
+        {"source": "props.PL_FAR_MAX", "label": "far_max_rw", "desc": "FAR สูงสุด (เลขเดียวกับ FAR_MAX เดิม)", "type": "float"},
+        {"source": "props.PL_FAR_MIN", "label": "far_min", "type": "float"},
+        {"source": "props.PL_BCR_MAX", "label": "bcr_max_rw", "desc": "BCR สูงสุด (เลขเดียวกับ BCR_MAX เดิม)", "type": "float"},
+        {"source": "props.PL_BCR_MIN", "label": "bcr_min", "type": "float"},
+        {"source": "props.PL_DENS_H", "label": "dens_h_rw", "desc": "ความหนาแน่นสูง (เลขเดียวกับ DENS_H เดิม)", "type": "float"},
+        {"source": "props.PL_DENS_L", "label": "dens_l_rw", "desc": "ความหนาแน่นต่ำ (เลขเดียวกับ DENS_L เดิม)", "type": "float"}
+      ]
+    },
+    {
+      "name": "ข้อมูลผัง",
+      "fields": [
+        {"source": "props.NAME", "label": "plan_name_rw", "desc": "ชื่อผังเมือง (เลขเดียวกับ PLAN_NAME เดิม)", "type": "str"},
+        {"source": "props.YEAR", "label": "year_raw", "desc": "ปี พ.ศ.", "type": "str"},
+        {"source": "props.CODE", "label": "plan_code", "desc": "รหัสผัง", "type": "str"},
+        {"source": "props.GAZ_NO", "label": "gaz_no", "desc": "ราชกิจจานุเบกษา เลขที่", "type": "str"},
+        {"source": "props.GAZ_DATE", "label": "gaz_date", "desc": "วันประกาศราชกิจจาฯ", "type": "str"}
+      ]
+    },
+    {
+      "name": "ArcGIS metadata",
+      "fields": [
+        {"source": "props.OBJECTID", "label": "objectid", "desc": "OID จาก service", "type": "int"},
+        {"source": "props.Shape_Length", "label": "shape_len", "desc": "เส้นรอบรูป (หน่วยตาม service)", "type": "float"},
+        {"source": "props.Shape_Area", "label": "shape_area", "desc": "พื้นที่ (หน่วยตาม service)", "type": "float"}
+      ]
+    },
+    {
+      "name": "Virtual (คำนวณ)",
+      "fields": [
+        {"source": "virtual.pl_use_th", "label": "pl_use_th", "desc": "แปลง PL_USE เป็นข้อความไทยจาก legend (เลขเดียวกับ PL_USE_TH เดิม)", "type": "str"},
+        {"source": "virtual.zone_hex", "label": "zone_hex", "desc": "สี hex จาก legend (เลขเดียวกับ ZONE_HEX เดิม)", "type": "str"},
+        {"source": "virtual.area_rai", "label": "area_rai_v", "desc": "พื้นที่ในหน่วยไร่ (เลขเดียวกับ AREA_RAI เดิม)", "type": "float"},
+        {"source": "virtual.area_m2", "label": "area_m2_v", "desc": "พื้นที่ในหน่วยตารางเมตร (UTM)", "type": "float"}
+      ]
+    }
+  ],
+  "note": "ชื่อฟิลด์ใน props อาจต่างจากที่ list ไว้ ขึ้นกับ service แต่ละจังหวัด — editor จะ probe raw จากไฟล์ล่าสุดใน output/landuse/ ถ้ามี"
+}

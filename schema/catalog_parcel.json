@@ -1,0 +1,118 @@
+{
+  "section": "parcel",
+  "description": "ฟิลด์ดิบจาก LandsMaps API ของ 1 แปลงที่ดิน (โฉนด/น.ส.3ก) — ใช้โชว์ใน schema editor",
+  "fixed_fields": [
+    "Owner_Name", "Surname", "Contact_No", "Type_land", "Rawang", "Group",
+    "Plang", "Cert_No", "Rai", "Ngan", "Wa", "Status", "LLA_no", "Remark"
+  ],
+  "groups": [
+    {
+      "name": "ID",
+      "fields": [
+        {"source": "seq", "label": "seq", "desc": "ลำดับ API (ตรงกับ parcel_seq)", "type": "str", "example": "20000960000094281017"},
+        {"source": "info.parcel_seq", "label": "parcel_seq", "desc": "ลำดับแปลง", "type": "str"},
+        {"source": "info.reg_seq", "label": "reg_seq", "desc": "เลขทะเบียน", "type": "str"}
+      ]
+    },
+    {
+      "name": "เลขระวาง",
+      "fields": [
+        {"source": "info.utm", "label": "utm", "desc": "ระวางเต็ม '5339 IV 7606-00 (4000)'", "type": "str", "example": "5339 IV 7606-00 (4000)"},
+        {"source": "info.utm1", "label": "utm1", "type": "str", "example": "5339"},
+        {"source": "info.utm2", "label": "utm2", "type": "str", "example": "4"},
+        {"source": "info.utm3", "label": "utm3", "type": "str", "example": "7606"},
+        {"source": "info.utm4", "label": "utm4", "type": "str", "example": "00"},
+        {"source": "info.utmscale", "label": "utmscale", "desc": "มาตราส่วน 4000/50000", "type": "int", "example": "4000"},
+        {"source": "info.parcelbound", "label": "parcelbound", "desc": "ปกติว่าง", "type": "str"}
+      ]
+    },
+    {
+      "name": "เลขแปลง",
+      "fields": [
+        {"source": "info.landno", "label": "landno", "desc": "เลขที่ดิน", "type": "str", "example": "7"},
+        {"source": "info.parcelno", "label": "parcelno", "desc": "เลขที่โฉนด/น.ส.", "type": "str", "example": "7"},
+        {"source": "info.surveyno", "label": "surveyno", "desc": "เลขที่สำรวจ", "type": "str", "example": "7"}
+      ]
+    },
+    {
+      "name": "ที่ตั้ง",
+      "fields": [
+        {"source": "info.tumbolname", "label": "tumbolname", "desc": "ตำบล", "type": "str", "example": "ห้วยยายจิ๋ว"},
+        {"source": "info.tumbolname_en", "label": "tumbolname_en", "type": "str", "example": "Huai Yai Chio"},
+        {"source": "info.amphurname", "label": "amphurname", "desc": "อำเภอ", "type": "str", "example": "เทพสถิต"},
+        {"source": "info.amphurname_en", "label": "amphurname_en", "type": "str"},
+        {"source": "info.provname", "label": "provname", "desc": "จังหวัด", "type": "str", "example": "ชัยภูมิ"},
+        {"source": "info.provname_en", "label": "provname_en", "type": "str"},
+        {"source": "info.provid", "label": "provid", "desc": "รหัสจังหวัด", "type": "str", "example": "36"},
+        {"source": "info.amphurid", "label": "amphurid", "desc": "รหัสอำเภอ", "type": "str", "example": "3609"},
+        {"source": "info.tambol_id", "label": "tambol_id", "desc": "รหัสตำบล", "type": "str", "example": "360902"}
+      ]
+    },
+    {
+      "name": "พิกัด",
+      "fields": [
+        {"source": "info.parcellat", "label": "parcellat", "desc": "lat แปลง (WGS84)", "type": "float", "example": "15.42791522"},
+        {"source": "info.parcellon", "label": "parcellon", "desc": "lon แปลง (WGS84)", "type": "float", "example": "101.57909320"},
+        {"source": "info.n", "label": "utm_n", "desc": "Northing (UTM)", "type": "float"},
+        {"source": "info.e", "label": "utm_e", "desc": "Easting (UTM)", "type": "float"},
+        {"source": "info.zone", "label": "utm_zone", "desc": "UTM zone", "type": "int", "example": "47"}
+      ]
+    },
+    {
+      "name": "ขนาด",
+      "fields": [
+        {"source": "info.rai", "label": "rai", "desc": "ไร่", "type": "int"},
+        {"source": "info.ngan", "label": "ngan", "desc": "งาน", "type": "int"},
+        {"source": "info.wa", "label": "wa", "desc": "ตร.วา (ส่วนเต็ม)", "type": "float"},
+        {"source": "info.subwa", "label": "subwa", "desc": "ตร.วา (ทศนิยม × 10)", "type": "float"}
+      ]
+    },
+    {
+      "name": "ประเภท/ราคา",
+      "fields": [
+        {"source": "info.parcel_type", "label": "parcel_type", "desc": "โฉนด/น.ส.3ก", "type": "str"},
+        {"source": "info.landprice", "label": "landprice", "desc": "ราคาประเมิน บาท/ตร.วา", "type": "float", "example": "75"}
+      ]
+    },
+    {
+      "name": "สำนักงานที่ดิน",
+      "fields": [
+        {"source": "info.landoffice", "label": "landoffice", "type": "str", "example": "สำนักงานที่ดินจังหวัดชัยภูมิ สาขาบำเหน็จณรงค์"},
+        {"source": "info.landoffice_en", "label": "landoffice_en", "type": "str"},
+        {"source": "info.landoffice_id", "label": "landoffice_id", "type": "str"},
+        {"source": "info.landoffice_seq", "label": "landoffice_seq", "type": "str"},
+        {"source": "info.landofficelat", "label": "landofficelat", "type": "float"},
+        {"source": "info.landofficelon", "label": "landofficelon", "type": "float"},
+        {"source": "info.org_tel", "label": "org_tel", "desc": "โทรศัพท์สำนักงาน", "type": "str"},
+        {"source": "info.queuesurvey", "label": "queuesurvey", "desc": "คิวรังวัด", "type": "int"}
+      ]
+    },
+    {
+      "name": "ลิงก์ภายนอก",
+      "fields": [
+        {"source": "info.surveyprice_link", "label": "surveyprice_url", "desc": "PDF ราคาประเมิน", "type": "str"},
+        {"source": "info.lecs_weblink", "label": "lecs_url", "type": "str"},
+        {"source": "info.treasury_weblink", "label": "treasury_url", "desc": "กรมธนารักษ์", "type": "str"},
+        {"source": "info.qrcode_link", "label": "qrcode_url", "type": "str"}
+      ]
+    },
+    {
+      "name": "สถานะ (API ปกติให้ null)",
+      "fields": [
+        {"source": "info.lands_owner", "label": "lands_owner", "desc": "เจ้าของ (public API ให้ null)", "type": "str"},
+        {"source": "info.lands_allocation", "label": "lands_alloc", "type": "str"},
+        {"source": "info.lands_status.obligation", "label": "st_obligatn", "type": "str"},
+        {"source": "info.lands_status.freeze", "label": "st_freeze", "type": "str"},
+        {"source": "info.lands_status.not_transfer", "label": "st_notxfer", "type": "str"}
+      ]
+    },
+    {
+      "name": "Virtual (คำนวณจากหลายฟิลด์)",
+      "fields": [
+        {"source": "virtual.wa_total", "label": "wa_total", "desc": "wa + subwa/10 (เลขเดียวกับฟิลด์ Wa เดิม)", "type": "float"},
+        {"source": "virtual.rawang_short", "label": "rawang_sh", "desc": "ตัด (scale) ออกจาก utm (เลขเดียวกับฟิลด์ Rawang เดิม)", "type": "str"},
+        {"source": "virtual.area_m2", "label": "area_m2", "desc": "(rai*1600 + ngan*400 + wa_total*4)", "type": "float"}
+      ]
+    }
+  ]
+}

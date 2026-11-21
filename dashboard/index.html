@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LandParcels Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root{
+    --bg:#f6f5f0; --surface:#ffffff; --surface-2:#faf9f4;
+    --border:#e2e0d8; --ink:#1a1a17; --muted:#6a6a62;
+    --accent:#1a7a3e; --accent-ink:#ffffff;
+    --blue:#0d6efd; --amber:#b8720a; --red:#a3261f; --green:#1a7a3e;
+    --locked:#f1efea; --locked-ink:#7a7a71;
+    --warn-bg:#fff6dc; --warn-ink:#8a6a0a;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Noto Sans Thai", "Sarabun", sans-serif;
+    --radius:8px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141412; --surface:#1d1d1a; --surface-2:#242421;
+      --border:#333330; --ink:#ecece6; --muted:#9a9a90;
+      --locked:#242421; --locked-ink:#8a8a80; --warn-bg:#3a2e0a; --warn-ink:#e8c766;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;display:grid;grid-template-rows:auto 1fr;height:100vh;overflow:hidden}
+
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:16px}
+  header h1{margin:0;font-size:16px;font-weight:600}
+  header .brand{display:flex;align-items:center;gap:8px}
+  header .pill{background:var(--surface-2);border:1px solid var(--border);padding:3px 10px;border-radius:999px;font-size:11px;color:var(--muted)}
+  header .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+  header .right{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted)}
+
+  .layout{display:grid;grid-template-columns:200px 1fr;height:100%;overflow:hidden}
+  nav.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+  nav.sidebar button{background:transparent;border:0;color:var(--ink);text-align:left;padding:10px 12px;border-radius:6px;cursor:pointer;font:inherit;font-weight:500;display:flex;align-items:center;gap:10px;font-size:14px}
+  nav.sidebar button:hover{background:var(--surface-2)}
+  nav.sidebar button.active{background:var(--accent);color:var(--accent-ink)}
+  nav.sidebar .sep{height:1px;background:var(--border);margin:8px 4px}
+  nav.sidebar .foot{margin-top:auto;font-size:11px;color:var(--muted);padding:8px 12px}
+
+  main{overflow-y:auto;padding:20px}
+  .section{display:none;max-width:1200px;margin:0 auto}
+  .section.active{display:block}
+  .section > h2{margin:0 0 4px;font-size:22px;font-weight:600}
+  .section > .desc{color:var(--muted);margin-bottom:20px;font-size:14px}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+  .card > h3{margin:0;padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .card > .body{padding:16px}
+  .card > .body.p0{padding:0}
+
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  button.btn{background:var(--accent);color:var(--accent-ink);border:0;padding:7px 14px;border-radius:6px;cursor:pointer;font:inherit;font-weight:500;font-size:13px}
+  button.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+  button.btn.blue{background:var(--blue)}
+  button.btn.red{background:var(--red)}
+  button.btn:disabled{opacity:.5;cursor:not-allowed}
+  button.btn.sm{padding:4px 10px;font-size:12px}
+
+  input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--ink);border:1px solid var(--border);border-radius:5px;padding:6px 10px;font:inherit;font-size:13px}
+  input[type=text]:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb, var(--accent) 50%, transparent);border-color:var(--accent)}
+  textarea{font-family:var(--mono);width:100%}
+  label{font-size:13px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .col{display:flex;flex-direction:column;gap:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 14px;border-bottom:1px solid var(--border)}
+  th{background:var(--surface-2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  tr:hover td{background:color-mix(in srgb, var(--accent) 6%, var(--surface) 94%)}
+  tr.selected td{background:color-mix(in srgb, var(--accent) 14%, var(--surface) 86%)}
+  td code{font-family:var(--mono);font-size:12px}
+  .muted{color:var(--muted)}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .kpi .value{font-size:24px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .pbar{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+  .pbar > .fill{height:100%;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#fff));width:0%;transition:width .3s;position:relative}
+  .pbar.indet > .fill{width:35%!important;animation:indet 1.2s infinite}
+  @keyframes indet{0%{margin-left:-35%}100%{margin-left:100%}}
+
+  .logbox{background:#0a0a08;color:#dde0c0;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.5;max-height:420px;overflow-y:auto;border-radius:6px;white-space:pre-wrap;word-break:break-word}
+  .logbox .l-warn{color:#e8c766}
+  .logbox .l-err{color:#f0938a}
+  .logbox .l-ok{color:#b5e6a4}
+
+  #map{height:420px;border-radius:6px}
+  #areaMap{height:360px;border-radius:6px}
+
+  .group{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+  .group > h4{margin:0;padding:8px 14px;background:var(--surface-2);font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .group .g-count{font-weight:400;color:var(--muted);font-size:11px}
+  .field{display:grid;grid-template-columns:auto 1.1fr 1.4fr 1.1fr 60px;gap:10px;align-items:center;padding:6px 14px;border-top:1px solid var(--border);font-size:12px}
+  .field.locked{background:var(--locked);color:var(--locked-ink)}
+  .field code{font-family:var(--mono);font-size:11px;background:var(--surface-2);padding:1px 5px;border-radius:3px;color:var(--ink)}
+  .field.locked code{background:transparent}
+  .field .desc{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .field input[type=text]{width:100%;padding:3px 7px;font-family:var(--mono);font-size:11px}
+  .field input[type=text]:disabled{background:transparent;border-color:transparent}
+  .field .type{text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+  .b-pending{background:#eee;color:#555}
+  .b-running{background:#ddefff;color:#0d6efd}
+  .b-done{background:#dcf4e4;color:#1a7a3e}
+  .b-failed{background:#fde3df;color:#a3261f}
+  .b-cancelled{background:#ececec;color:#777}
+
+  .warn{background:var(--warn-bg);color:var(--warn-ink);padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:10px}
+
+  .tabs-sub{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:12px}
+  .tabs-sub button{background:transparent;border:0;color:var(--muted);padding:8px 14px;cursor:pointer;font:inherit;font-weight:500;border-bottom:2px solid transparent}
+  .tabs-sub button.active{color:var(--ink);border-bottom-color:var(--accent)}
+
+  .pill-list{display:flex;gap:6px;flex-wrap:wrap}
+  .pill-item{background:var(--surface-2);border:1px solid var(--border);padding:3px 10px;border-radius:999px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
+  .pill-item button{background:transparent;border:0;cursor:pointer;color:var(--muted);font-size:14px;padding:0}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:60px 1fr}
+    nav.sidebar button span.lbl{display:none}
+    .kpi-row{grid-template-columns:repeat(2,1fr)}
+    .grid2,.grid3{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="status-dot" id="svDot"></span><h1>🗂️ LandParcels Dashboard</h1></div>
+  <span class="pill" id="svPill">localhost:8765</span>
+  <div class="right">
+    <span id="jobCount" class="pill">0 jobs</span>
+    <span class="pill" id="clockPill">—</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <button data-tab="overview" class="active"><span>🏠</span><span class="lbl">Overview</span></button>
+    <div class="sep"></div>
+    <button data-tab="input"><span>📥</span><span class="lbl">Input · areas</span></button>
+    <button data-tab="schema"><span>🗂</span><span class="lbl">Schema</span></button>
+    <button data-tab="parcel"><span>🏞</span><span class="lbl">Run · Parcel</span></button>
+    <button data-tab="city"><span>🏙</span><span class="lbl">Run · Cityplanning</span></button>
+    <div class="sep"></div>
+    <button data-tab="monitor"><span>📊</span><span class="lbl">Monitor</span></button>
+    <button data-tab="output"><span>📤</span><span class="lbl">Output files</span></button>
+    <div class="foot">v0.1 · dashboard/server.py</div>
+  </nav>
+
+  <main>
+
+    <section id="sec-overview" class="section active">
+      <h2>ภาพรวม</h2>
+      <div class="desc">สถานะ workspace แบบย่อ — เลือกเมนูด้านซ้ายเพื่อทำงาน</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">Areas ใน folder</div><div class="value" id="kpiAreas">–</div><div class="sub">areas/</div></div>
+        <div class="kpi"><div class="label">Output files</div><div class="value" id="kpiOutput">–</div><div class="sub">shp/gpkg/geojson</div></div>
+        <div class="kpi"><div class="label">Jobs ที่รันอยู่</div><div class="value" id="kpiRunning">0</div><div class="sub">running</div></div>
+        <div class="kpi"><div class="label">Schema custom fields</div><div class="value" id="kpiExtra">–</div><div class="sub">parcel + city</div></div>
+      </div>
+      <div class="card"><h3>Jobs ล่าสุด <button class="btn ghost sm" id="refreshJobs">↻ refresh</button></h3>
+        <div class="body p0"><table id="jobsTable"><thead><tr><th>ID</th><th>Kind</th><th>สถานะ</th><th>Progress</th><th>เริ่มเมื่อ</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="sec-input" class="section">
+      <h2>📥 Input · ไฟล์ขอบเขตพื้นที่</h2>
+      <div class="desc">ไฟล์ใน <code>areas/</code> ที่ใช้เป็นขอบเขตดึงแปลง — คลิกรายการเพื่อดูบนแผนที่</div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Files <button class="btn ghost sm" id="refreshAreas">↻</button></h3>
+          <div class="body p0"><table id="areaTable"><thead><tr><th>ชื่อ</th><th>ชนิด</th><th>ขนาด</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="card"><h3>Preview บนแผนที่ <span class="muted" id="areaSelLabel">—</span></h3><div class="body"><div id="areaMap"></div></div></div>
+      </div>
+    </section>
+
+    <section id="sec-schema" class="section">
+      <h2>🗂 Schema · เลือกฟิลด์ + ตั้งชื่อ custom</h2>
+      <div class="desc">ฟิลด์เสริมที่จะใส่เพิ่มในผลลัพธ์ shapefile (fixed 14/12 ฟิลด์ถูกล็อก — เปลี่ยนไม่ได้)</div>
+      <div class="toolbar">
+        <button class="btn" id="schSave">💾 Save user_schema.json</button>
+        <button class="btn ghost" id="schReload">↻ Reload</button>
+        <span class="muted" id="schStatus"></span>
+      </div>
+      <div class="tabs-sub"><button data-stab="parcel" class="active">parcel</button><button data-stab="cityplanning">cityplanning</button></div>
+      <div id="schHost"></div>
+    </section>
+
+    <section id="sec-parcel" class="section">
+      <h2>🏞 Run · fetch_parcels.py</h2>
+      <div class="desc">ดึงแปลงที่ดิน (โฉนด + น.ส.3ก) ตามไฟล์ขอบเขต → output/&lt;ชื่อ&gt;/*.shp</div>
+      <div class="card"><div class="body">
+        <div class="col">
+          <label><b>เลือก areas</b> (ไม่เลือก = ทุกไฟล์ใน areas/)</label>
+          <div id="parcelAreaPicker" class="pill-list"></div>
+        </div>
+        <div class="grid3" style="margin-top:14px">
+          <div class="col"><label>--name (ถ้าเลือก 1 ไฟล์)</label><input type="text" id="pName" placeholder="ชื่อ output folder"></div>
+          <div class="col"><label>--layer (ถ้ามีหลาย layer)</label><input type="text" id="pLayer" placeholder="เว้นว่าง = รวมทุก layer"></div>
+          <div class="col"><label>--refetch</label><select id="pRefetch"><option value="none">none</option><option value="mismatch">mismatch</option><option value="notfound">notfound</option><option value="both">both</option></select></div>
+        </div>
+        <div style="margin-top:12px"><label><input type="checkbox" id="pNoDetail"> --no-detail (เอาแค่รูปแปลง ไม่ใช้โควตา)</label></div>
+        <div class="toolbar" style="margin-top:16px">
+          <button class="btn" id="runParcel">▶ Start</button>
+          <code class="muted" id="parcelCmdPreview"></code>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-city" class="section">
+      <h2>🏙 Run · fetch_cityplanning.py</h2>
+      <div class="desc">ดึงผังเมืองรายจังหวัด → output/cityplanning/&lt;รหัส&gt;/*.shp</div>
+      <div class="card"><div class="body">
+        <div class="col">
+          <label><b>เลือกจังหวัด</b> (รหัส 2 หลัก)</label>
+          <div class="row">
+            <input type="search" id="provFilter" placeholder="ค้นหาจังหวัด…" style="min-width:200px">
+            <select id="provSelect" style="min-width:240px"></select>
+            <button class="btn ghost sm" id="addProv">+ เพิ่ม</button>
+          </div>
+          <div id="provPicked" class="pill-list" style="margin-top:8px"></div>
+        </div>
+        <div class="grid3" style="margin-top:14px">
+          <div class="col"><label>--area (ตัดเฉพาะกรอบ)</label><select id="cArea"><option value="">—</option></select></div>
+          <div class="col"><label>--format</label><select id="cFormat"><option value="both">both</option><option value="shp">shp</option><option value="gpkg">gpkg</option></select></div>
+          <div class="col"><label>--method</label><select id="cMethod"><option value="auto">auto</option><option value="query">query</option><option value="identify">identify</option></select></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="col"><label>--layer</label><input type="text" id="cLayer" placeholder="เว้นว่าง = ชั้นผังรวม"></div>
+          <div class="col"><label>--token (ArcGIS)</label><input type="text" id="cToken" placeholder="หรือ ENV LANDSMAPS_ARCGIS_TOKEN"></div>
+        </div>
+        <div class="toolbar" style="margin-top:16px">
+          <button class="btn" id="runCity">▶ Start</button>
+          <code class="muted" id="cityCmdPreview"></code>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-monitor" class="section">
+      <h2>📊 Monitor</h2>
+      <div class="desc">สถานะ job ที่รันอยู่ — live log + progress bar + area preview</div>
+      <div class="card">
+        <h3><span id="monTitle">เลือก job จาก Overview</span><span class="row"><button class="btn red sm" id="cancelBtn" disabled>⏹ Cancel</button></span></h3>
+        <div class="body">
+          <div class="row" style="justify-content:space-between;margin-bottom:8px">
+            <div><span class="badge" id="monBadge">—</span> <code class="muted" id="monCmd"></code></div>
+            <div class="muted" style="font-size:12px" id="monDuration">—</div>
+          </div>
+          <div class="pbar" id="monPbar"><div class="fill"></div></div>
+          <div class="muted" id="monPct" style="margin-top:4px;font-size:12px">—</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Live log</h3><div class="body"><div id="monLog" class="logbox">— เลือก job เพื่อดู live log —</div></div></div>
+        <div class="card"><h3>แผนที่ (area ของ job)</h3><div class="body"><div id="map"></div></div></div>
+      </div>
+    </section>
+
+    <section id="sec-output" class="section">
+      <h2>📤 Output files</h2>
+      <div class="desc">ไฟล์ล่าสุดใน <code>output/</code> (shp/gpkg/geojson)</div>
+      <div class="card"><h3>Files <button class="btn ghost sm" id="refreshOutput">↻</button></h3><div class="body p0">
+        <table id="outTable"><thead><tr><th>Path</th><th>ขนาด</th><th>แก้ล่าสุด</th></tr></thead><tbody></tbody></table>
+      </div></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const API = '/api';
+const S = {
+  catalogs: { parcel: null, cityplanning: null },
+  schemaState: { parcel: new Map(), cityplanning: new Map() },
+  schemaTab: 'parcel',
+  areas: [], selectedArea: null,
+  provinces: [], pickedProvs: [],
+  jobs: [],
+  currentJob: null,
+  monEvents: null,
+  maps: { area: null, mon: null },
+  layers: { area: null, mon: null },
+};
+
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+function h(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function hum(bytes){ if(!bytes) return '—'; const u=['B','KB','MB','GB']; let i=0,v=bytes; while(v>1024&&i<u.length-1){v/=1024;i++} return v.toFixed(v<10?1:0)+u[i]; }
+function timeAgo(ts){ if(!ts) return '—'; const s=Math.floor(Date.now()/1000-ts); if(s<60) return s+'s ago'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+function dur(a,b){ if(!a) return '—'; const s=Math.floor((b||Date.now()/1000)-a); return s<60?`${s}s`:`${Math.floor(s/60)}m ${s%60}s`; }
+async function api(path, opts){ const r = await fetch(API+path, opts); if(!r.ok) throw new Error(`${r.status} ${r.statusText}: ${await r.text()}`); return r.json(); }
+
+$$('.sidebar button').forEach(b=>b.addEventListener('click',()=>{
+  const t=b.dataset.tab;
+  $$('.sidebar button').forEach(x=>x.classList.toggle('active',x===b));
+  $$('.section').forEach(s=>s.classList.toggle('active',s.id==='sec-'+t));
+  if(t==='input'){ initAreaMap(); loadAreas(); }
+  if(t==='schema'){ loadSchema(); }
+  if(t==='city'){ loadProvinces(); loadAreas().then(fillCityArea); }
+  if(t==='parcel'){ loadAreas().then(fillParcelPicker); }
+  if(t==='monitor'){ initMonMap(); }
+  if(t==='output'){ loadOutput(); }
+  if(t==='overview'){ refreshOverview(); }
+}));
+
+setInterval(()=>{ const d=new Date(); $('#clockPill').textContent=d.toLocaleTimeString('th-TH',{hour12:false}); },1000);
+
+async function refreshOverview(){
+  await Promise.all([loadAreas(), loadOutput(), loadJobs(), loadUserSchemaCount()]);
+}
+async function loadUserSchemaCount(){
+  try{
+    const u = await api('/user-schema');
+    const p = (u.parcel?.extra_fields||[]).length;
+    const c = (u.cityplanning?.extra_fields||[]).length;
+    $('#kpiExtra').textContent = `${p}+${c}`;
+  }catch{ $('#kpiExtra').textContent='—'; }
+}
+
+async function loadJobs(){
+  const { items } = await api('/jobs');
+  S.jobs = items;
+  const running = items.filter(j=>j.status==='running').length;
+  $('#kpiRunning').textContent = running;
+  $('#jobCount').textContent = `${items.length} jobs`;
+  const tb = $('#jobsTable tbody'); tb.innerHTML='';
+  if(items.length===0){ tb.innerHTML='<tr><td colspan="6" class="muted">ยังไม่มี job</td></tr>'; return; }
+  for(const j of items){
+    const pct = j.progress?.percent;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><code>${h(j.id)}</code></td>
+      <td>${h(j.kind)}</td>
+      <td><span class="badge b-${h(j.status)}">${h(j.status)}</span></td>
+      <td>${pct!=null?pct.toFixed(1)+'%':'—'}${j.progress?.n!=null?' <span class="muted">('+j.progress.n+'/'+j.progress.total+')</span>':''}</td>
+      <td class="muted">${timeAgo(j.started_at)}</td>
+      <td><button class="btn ghost sm" data-job="${j.id}">เปิด</button></td>`;
+    tb.appendChild(tr);
+  }
+  tb.querySelectorAll('button[data-job]').forEach(b=>b.addEventListener('click',()=>openJob(b.dataset.job)));
+}
+$('#refreshJobs').addEventListener('click',loadJobs);
+
+async function loadAreas(){
+  const { items } = await api('/areas');
+  S.areas = items;
+  $('#kpiAreas').textContent = items.length;
+  const tb = $('#areaTable tbody');
+  if(tb){
+    tb.innerHTML='';
+    if(items.length===0){ tb.innerHTML='<tr><td colspan="3" class="muted">ไม่มีไฟล์ใน areas/</td></tr>'; }
+    for(const a of items){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><code>${h(a.name)}</code></td><td class="muted">${h(a.kind)}</td><td class="muted">${hum(a.size)}</td>`;
+      tr.addEventListener('click',()=>selectArea(a.name, tr));
+      tb.appendChild(tr);
+    }
+  }
+}
+async function selectArea(name, row){
+  S.selectedArea = name;
+  $$('#areaTable tr').forEach(r=>r.classList.toggle('selected',r===row));
+  $('#areaSelLabel').textContent = name;
+  try{
+    const gj = await api(`/areas/${encodeURIComponent(name)}/geojson`);
+    showAreaOnMap(S.maps.area, 'area', gj);
+  }catch(e){ $('#areaSelLabel').textContent = name + ' — อ่านไม่ได้: '+e.message; }
+}
+function initAreaMap(){ if(S.maps.area) return; S.maps.area = L.map('areaMap').setView([13.75, 100.5], 6); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OSM'}).addTo(S.maps.area); }
+function initMonMap(){ if(S.maps.mon) return; S.maps.mon = L.map('map').setView([13.75,100.5], 6); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OSM'}).addTo(S.maps.mon); }
+function showAreaOnMap(map, key, geojson){
+  if(!map) return;
+  if(S.layers[key]){ map.removeLayer(S.layers[key]); }
+  const layer = L.geoJSON(geojson,{style:{color:'#1a7a3e',weight:2,fillOpacity:.1}}).addTo(map);
+  S.layers[key] = layer;
+  try{ map.fitBounds(layer.getBounds(),{padding:[20,20]}); }catch{}
+}
+$('#refreshAreas').addEventListener('click',loadAreas);
+
+async function loadOutput(){
+  const { items } = await api('/output');
+  $('#kpiOutput').textContent = items.length;
+  const tb = $('#outTable tbody'); if(!tb) return;
+  tb.innerHTML='';
+  if(items.length===0){ tb.innerHTML='<tr><td colspan="3" class="muted">ยังไม่มี output</td></tr>'; return; }
+  for(const o of items){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><code>${h(o.path)}</code></td><td class="muted">${hum(o.size)}</td><td class="muted">${timeAgo(o.mtime)}</td>`;
+    tb.appendChild(tr);
+  }
+}
+$('#refreshOutput').addEventListener('click',loadOutput);
+
+async function loadSchema(){
+  if(!S.catalogs.parcel){
+    S.catalogs.parcel = await api('/catalog/parcel');
+    S.catalogs.cityplanning = await api('/catalog/cityplanning');
+    const u = await api('/user-schema');
+    buildSchemaState('parcel', u.parcel?.extra_fields||[]);
+    buildSchemaState('cityplanning', u.cityplanning?.extra_fields||[]);
+  }
+  renderSchema();
+}
+function buildSchemaState(key, savedExtras){
+  const cat = S.catalogs[key];
+  const fixed = new Set(cat.fixed_fields||[]);
+  const savedMap = new Map((savedExtras||[]).map(x=>[x.source, x.name]));
+  S.schemaState[key].clear();
+  for(const g of cat.groups||[]){
+    for(const f of g.fields||[]){
+      const isFixed = fixed.has(f.label);
+      const saved = savedMap.get(f.source);
+      S.schemaState[key].set(f.source, {
+        checked: isFixed || saved != null,
+        name: saved ?? f.label,
+        fixed: isFixed,
+        _field: f,
+      });
+    }
+  }
+}
+function renderSchema(){
+  $$('.tabs-sub button').forEach(b=>b.classList.toggle('active', b.dataset.stab===S.schemaTab));
+  const host = $('#schHost');
+  const key = S.schemaTab;
+  const cat = S.catalogs[key];
+  if(!cat){ host.innerHTML='<div class="muted">กำลังโหลด…</div>'; return; }
+  const parts = [`<div class="warn">⚠️ fixed_fields (${cat.fixed_fields.length}) ล็อกไว้ — เปลี่ยนไม่ได้</div>`];
+  for(const g of cat.groups||[]){
+    const chosen = g.fields.filter(f=>S.schemaState[key].get(f.source).checked).length;
+    parts.push(`<div class="group"><h4><span>${h(g.name)}</span><span class="g-count">${chosen}/${g.fields.length}</span></h4>`);
+    for(const f of g.fields){
+      const st = S.schemaState[key].get(f.source);
+      const desc = (f.desc||'')+(f.example?` (เช่น ${f.example})`:'');
+      parts.push(`<div class="field${st.fixed?' locked':''}">
+        <input type="checkbox" ${st.checked?'checked':''} ${st.fixed?'disabled':''} data-src="${h(f.source)}">
+        <code>${h(f.source)}</code>
+        <span class="desc" title="${h(desc)}">${h(desc||'—')}</span>
+        <input type="text" value="${h(st.name)}" ${st.fixed?'disabled':''} data-src="${h(f.source)}" data-k="name" maxlength="10">
+        <span class="type">${h(f.type||'')}</span>
+      </div>`);
+    }
+    parts.push('</div>');
+  }
+  host.innerHTML = parts.join('');
+  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{
+    S.schemaState[key].get(cb.dataset.src).checked = cb.checked; renderSchema();
+  }));
+  host.querySelectorAll('input[type=text]').forEach(inp=>inp.addEventListener('input',()=>{
+    S.schemaState[key].get(inp.dataset.src).name = inp.value.trim();
+  }));
+}
+$$('.tabs-sub button').forEach(b=>b.addEventListener('click',()=>{ S.schemaTab=b.dataset.stab; renderSchema(); }));
+$('#schSave').addEventListener('click',async()=>{
+  const body = { parcel:{extra_fields:[]}, cityplanning:{extra_fields:[]} };
+  for(const key of ['parcel','cityplanning']){
+    for(const [src,st] of S.schemaState[key]){
+      if(!st.checked||st.fixed||!st.name) continue;
+      body[key].extra_fields.push({source: src, name: st.name});
+    }
+  }
+  try{
+    const r = await api('/user-schema',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    $('#schStatus').textContent = '✓ บันทึก ' + r.path;
+    loadUserSchemaCount();
+  }catch(e){ $('#schStatus').textContent = '✗ '+e.message; }
+});
+$('#schReload').addEventListener('click',async()=>{
+  const u = await api('/user-schema');
+  buildSchemaState('parcel', u.parcel?.extra_fields||[]);
+  buildSchemaState('cityplanning', u.cityplanning?.extra_fields||[]);
+  renderSchema();
+  $('#schStatus').textContent = '↻ โหลดจาก disk';
+});
+
+function fillParcelPicker(){
+  const host = $('#parcelAreaPicker'); host.innerHTML='';
+  if(S.areas.length===0){ host.innerHTML='<span class="muted">ไม่มีไฟล์ใน areas/</span>'; return; }
+  for(const a of S.areas){
+    const id = 'pa_'+a.name.replace(/\W/g,'_');
+    host.innerHTML += `<label class="pill-item"><input type="checkbox" id="${id}" data-name="${h(a.name)}"> ${h(a.name)}</label>`;
+  }
+  host.querySelectorAll('input').forEach(c=>c.addEventListener('change',updateParcelCmdPreview));
+  updateParcelCmdPreview();
+}
+function parcelArgs(){
+  const areas = Array.from(document.querySelectorAll('#parcelAreaPicker input:checked')).map(c=>c.dataset.name);
+  return {
+    areas,
+    no_detail: $('#pNoDetail').checked,
+    refetch: $('#pRefetch').value,
+    layer: $('#pLayer').value.trim() || null,
+    name: $('#pName').value.trim() || null,
+  };
+}
+function updateParcelCmdPreview(){
+  const a = parcelArgs();
+  const parts = ['python fetch_parcels.py', ...a.areas.map(x=>'areas/'+x)];
+  if(a.no_detail) parts.push('--no-detail');
+  if(a.refetch&&a.refetch!=='none') parts.push('--refetch',a.refetch);
+  if(a.layer) parts.push('--layer',a.layer);
+  if(a.name) parts.push('--name',a.name);
+  $('#parcelCmdPreview').textContent = parts.join(' ');
+}
+['pNoDetail','pRefetch','pLayer','pName'].forEach(id=>$('#'+id).addEventListener('input',updateParcelCmdPreview));
+$('#runParcel').addEventListener('click',async()=>{
+  try{
+    const r = await api('/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'parcel',parcel:parcelArgs()})});
+    openJob(r.job_id); switchTo('monitor');
+  }catch(e){ alert('Start fail: '+e.message); }
+});
+
+async function loadProvinces(){
+  if(S.provinces.length>0) return;
+  const { items } = await api('/provinces');
+  S.provinces = items;
+  fillProvDropdown();
+}
+function fillProvDropdown(){
+  const q = $('#provFilter').value.trim().toLowerCase();
+  const sel = $('#provSelect'); sel.innerHTML='';
+  const matched = S.provinces.filter(p=>!q||p.code.includes(q)||p.name.toLowerCase().includes(q));
+  for(const p of matched) sel.innerHTML += `<option value="${h(p.code)}">${h(p.code)} ${h(p.name)}</option>`;
+}
+$('#provFilter')?.addEventListener('input',fillProvDropdown);
+$('#addProv')?.addEventListener('click',()=>{
+  const v = $('#provSelect').value; if(!v || S.pickedProvs.includes(v)) return;
+  S.pickedProvs.push(v); renderPickedProvs();
+});
+function renderPickedProvs(){
+  const host = $('#provPicked'); host.innerHTML='';
+  for(const code of S.pickedProvs){
+    const p = S.provinces.find(x=>x.code===code);
+    const name = p ? `${code} ${p.name}` : code;
+    host.innerHTML += `<span class="pill-item">${h(name)} <button data-code="${h(code)}">×</button></span>`;
+  }
+  host.querySelectorAll('button[data-code]').forEach(b=>b.addEventListener('click',()=>{
+    S.pickedProvs = S.pickedProvs.filter(c=>c!==b.dataset.code); renderPickedProvs(); updateCityCmdPreview();
+  }));
+  updateCityCmdPreview();
+}
+function fillCityArea(){
+  const sel = $('#cArea'); sel.innerHTML='<option value="">—</option>';
+  for(const a of S.areas) sel.innerHTML += `<option value="${h(a.name)}">${h(a.name)}</option>`;
+}
+function cityArgs(){
+  return {
+    provinces: S.pickedProvs.slice(),
+    area: $('#cArea').value || null,
+    layer: $('#cLayer').value.trim() || null,
+    token: $('#cToken').value.trim() || null,
+    format: $('#cFormat').value,
+    method: $('#cMethod').value,
+  };
+}
+function updateCityCmdPreview(){
+  const a = cityArgs();
+  const parts = ['python fetch_cityplanning.py', ...a.provinces];
+  if(a.area) parts.push('--area','areas/'+a.area);
+  if(a.layer) parts.push('--layer',a.layer);
+  if(a.token) parts.push('--token','***');
+  if(a.format&&a.format!=='both') parts.push('--format',a.format);
+  if(a.method&&a.method!=='auto') parts.push('--method',a.method);
+  $('#cityCmdPreview').textContent = parts.join(' ');
+}
+['cArea','cFormat','cMethod','cLayer','cToken'].forEach(id=>$('#'+id)?.addEventListener('input',updateCityCmdPreview));
+$('#runCity').addEventListener('click',async()=>{
+  const args = cityArgs(); if(args.provinces.length===0) return alert('ยังไม่เลือกจังหวัด');
+  try{
+    const r = await api('/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'cityplanning',cityplanning:args})});
+    openJob(r.job_id); switchTo('monitor');
+  }catch(e){ alert('Start fail: '+e.message); }
+});
+
+function switchTo(tab){ const b = document.querySelector(`.sidebar button[data-tab="${tab}"]`); if(b) b.click(); }
+async function openJob(id){
+  if(S.monEvents){ S.monEvents.close(); S.monEvents=null; }
+  const j = await api(`/jobs/${id}`);
+  S.currentJob = j;
+  $('#monTitle').textContent = `Job ${j.id} · ${j.kind}`;
+  $('#monCmd').textContent = (j.cmd||[]).join(' ');
+  $('#monBadge').className = 'badge b-'+j.status;
+  $('#monBadge').textContent = j.status;
+  $('#cancelBtn').disabled = j.status !== 'running';
+  const log = $('#monLog'); log.textContent = (j.lines||[]).join('\n');
+  updateProgress(j.progress);
+  initMonMap();
+  const areaName = j.kind==='parcel' ? (j.args?.areas||[])[0] : j.args?.area;
+  if(areaName){
+    try{ const gj = await api(`/areas/${encodeURIComponent(areaName)}/geojson`); showAreaOnMap(S.maps.mon,'mon',gj); }catch{}
+  }
+  const es = new EventSource(`${API}/jobs/${id}/stream`);
+  S.monEvents = es;
+  es.onmessage = ev => {
+    try{
+      const d = JSON.parse(ev.data);
+      if(d.type==='line'){
+        appendLog(d.line);
+        if(d.progress) updateProgress(d.progress);
+      }else if(d.type==='status'){
+        $('#monBadge').className='badge b-'+d.status;
+        $('#monBadge').textContent=d.status;
+        if(d.status!=='running'){ $('#cancelBtn').disabled=true; es.close(); S.monEvents=null; loadJobs(); loadOutput(); }
+        else $('#cancelBtn').disabled=false;
+      }
+    }catch(e){ console.error(e); }
+  };
+  startDurationTicker();
+}
+function appendLog(line){
+  const log = $('#monLog');
+  const span = document.createElement('div');
+  const cls = /error|ผิดพลาด|fail/i.test(line) ? 'l-err' : /warn|เตือน/i.test(line) ? 'l-warn' : /ok|สำเร็จ|เสร็จ|done/i.test(line) ? 'l-ok' : '';
+  if(cls) span.className=cls;
+  span.textContent = line;
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+function updateProgress(p){
+  if(!p || p.percent==null){ $('#monPbar').classList.add('indet'); $('#monPct').textContent='—'; return; }
+  $('#monPbar').classList.remove('indet');
+  $('#monPbar').querySelector('.fill').style.width = Math.min(100,p.percent)+'%';
+  $('#monPct').textContent = `${p.percent.toFixed(1)}%${p.n!=null?' ('+p.n+'/'+p.total+')':''}`;
+}
+let durTimer=null;
+function startDurationTicker(){
+  if(durTimer) clearInterval(durTimer);
+  durTimer = setInterval(()=>{
+    const j=S.currentJob; if(!j||!j.started_at){ $('#monDuration').textContent='—'; return; }
+    const end = j.status==='running' ? null : j.ended_at;
+    $('#monDuration').textContent = dur(j.started_at, end);
+  },1000);
+}
+$('#cancelBtn').addEventListener('click',async()=>{
+  if(!S.currentJob) return;
+  if(!confirm('ยกเลิก job นี้?')) return;
+  await api(`/jobs/${S.currentJob.id}/cancel`,{method:'POST'});
+});
+
+async function healthCheck(){
+  try{ await api('/jobs'); $('#svDot').style.background='var(--green)'; }
+  catch(e){ $('#svDot').style.background='var(--red)'; $('#svPill').textContent='server unreachable'; }
+}
+healthCheck();
+refreshOverview();
+setInterval(loadJobs, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LandParcels Schema Editor</title>
+<style>
+  :root{
+    --bg:#fafaf7; --surface:#ffffff; --border:#e2e2dd; --ink:#1a1a17; --muted:#6a6a62;
+    --accent:#0d6efd; --accent-ink:#ffffff; --locked:#f1efea; --locked-ink:#7a7a71;
+    --green:#1a7a3e; --red:#a3261f; --warn:#8a6a0a; --warn-bg:#fff6dc;
+    --mono: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    --sans: -apple-system, "Segoe UI", "Noto Sans Thai", "Sarabun", sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141412; --surface:#1d1d1a; --border:#333330; --ink:#ecece6; --muted:#9a9a90;
+      --locked:#242421; --locked-ink:#8a8a80; --warn-bg:#3a2e0a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  header{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{margin:0;font-size:18px;font-weight:600}
+  header .status{font-size:13px;color:var(--muted);margin-left:auto}
+  header .status.err{color:var(--red)}
+  nav.tabs{display:flex;gap:4px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+  nav.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:10px 16px;cursor:pointer;font:inherit;font-weight:500}
+  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
+  main{padding:20px;max-width:1100px;margin:0 auto}
+  .section{display:none}
+  .section.active{display:block}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+  button.btn{background:var(--accent);color:var(--accent-ink);border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font:inherit;font-weight:500}
+  button.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+  button.btn.danger{background:var(--red)}
+  button.btn:disabled{opacity:.5;cursor:not-allowed}
+  .count{font-size:13px;color:var(--muted);margin-left:8px}
+  .group{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .group > h3{margin:0;padding:10px 14px;background:color-mix(in srgb, var(--surface) 92%, var(--ink) 8%);font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .group > h3 .g-count{font-weight:400;color:var(--muted);font-size:12px}
+  .field{display:grid;grid-template-columns:auto 1fr 1.2fr 1.2fr 80px;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--border);font-size:13px}
+  .field:first-of-type{border-top:0}
+  .field.locked{background:var(--locked);color:var(--locked-ink)}
+  .field code{font-family:var(--mono);font-size:12px;background:color-mix(in srgb, var(--surface) 70%, var(--ink) 10%);padding:2px 6px;border-radius:3px;color:var(--ink)}
+  .field.locked code{background:transparent;color:var(--locked-ink)}
+  .field .desc{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .field input[type=text]{width:100%;padding:5px 8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:4px;font:inherit;font-family:var(--mono);font-size:12px}
+  .field input[type=text]:disabled{background:transparent;border-color:transparent;font-family:var(--mono)}
+  .field .type{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase}
+  .warn{background:var(--warn-bg);color:var(--warn);padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:12px}
+  .notice{background:color-mix(in srgb, var(--accent) 12%, var(--surface) 88%);padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:12px;border:1px solid color-mix(in srgb, var(--accent) 30%, var(--border) 70%)}
+  .preview{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--mono);font-size:12px;white-space:pre;overflow-x:auto;max-height:400px;overflow-y:auto}
+  .shortcol{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  label.inline{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+  .field-head{display:grid;grid-template-columns:auto 1fr 1.2fr 1.2fr 80px;gap:10px;align-items:center;padding:6px 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-top:1px solid var(--border);background:var(--locked)}
+  @media (max-width:800px){
+    .field,.field-head{grid-template-columns:auto 1fr 1fr;row-gap:4px}
+    .field .desc,.field-head .desc,.field .type,.field-head .type{display:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🗂️ LandParcels Schema Editor</h1>
+  <span id="status" class="status">กำลังโหลด catalog…</span>
+</header>
+<nav class="tabs">
+  <button data-tab="parcel" class="active">แปลงที่ดิน (parcel)</button>
+  <button data-tab="cityplanning">ผังเมือง (cityplanning)</button>
+  <button data-tab="preview">👁 Preview JSON</button>
+</nav>
+<main>
+
+  <div id="loader" class="notice" style="display:none">
+    เปิดไฟล์นี้แบบ <code>file://</code> โดยตรง เลือก catalog ด้วยตัวเอง:
+    <div class="shortcol" style="margin-top:8px">
+      <label class="inline">catalog_parcel.json: <input type="file" id="f_parcel" accept=".json"></label>
+      <label class="inline">catalog_cityplanning.json: <input type="file" id="f_city" accept=".json"></label>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted)">
+      หรือรัน <code>python -m http.server 8765</code> ใน <code>LandParcels/schema/</code> แล้วเปิด <code>http://localhost:8765/schema_editor.html</code>
+    </div>
+  </div>
+
+  <section id="sec-parcel" class="section active">
+    <div class="toolbar">
+      <button class="btn" id="save-all">💾 Save user_schema.json</button>
+      <button class="btn ghost" id="load-user">📂 Load user_schema.json</button>
+      <input type="file" id="f_user" accept=".json" style="display:none">
+      <button class="btn ghost" id="select-all-parcel">☑️ เลือกทั้งหมด</button>
+      <button class="btn ghost" id="clear-all-parcel">☐ ล้าง</button>
+      <button class="btn ghost" id="reset-names-parcel">↻ รีเซ็ตชื่อ (ใช้ label เดิม)</button>
+      <span class="count" id="count-parcel"></span>
+    </div>
+    <div class="warn" id="fixed-warn-parcel">
+      ⚠️ 14 ฟิลด์ล่างนี้เป็น <b>fixed_fields</b> ของ parcel merge pipeline — <b>ห้ามเปลี่ยนชื่อหรือลบ</b> (บังคับให้เลือก) ตั้งชื่อ custom ได้เฉพาะฟิลด์เสริม
+    </div>
+    <div id="groups-parcel"></div>
+  </section>
+
+  <section id="sec-cityplanning" class="section">
+    <div class="toolbar">
+      <button class="btn ghost" id="select-all-city">☑️ เลือกทั้งหมด</button>
+      <button class="btn ghost" id="clear-all-city">☐ ล้าง</button>
+      <button class="btn ghost" id="reset-names-city">↻ รีเซ็ตชื่อ (ใช้ label เดิม)</button>
+      <span class="count" id="count-city"></span>
+    </div>
+    <div class="warn" id="fixed-warn-city">
+      ⚠️ 12 ฟิลด์ล่างนี้เป็น <b>fixed_fields</b> ของ cityplanning merge pipeline — <b>ห้ามเปลี่ยนชื่อหรือลบ</b>
+    </div>
+    <div id="groups-city"></div>
+  </section>
+
+  <section id="sec-preview" class="section">
+    <div class="toolbar">
+      <button class="btn" id="copy-json">📋 Copy</button>
+      <button class="btn ghost" id="save-preview">💾 ดาวน์โหลด user_schema.json</button>
+    </div>
+    <pre id="preview" class="preview"></pre>
+  </section>
+
+</main>
+
+<script>
+const catalogs = { parcel: null, cityplanning: null };
+const state = { parcel: new Map(), cityplanning: new Map() };
+
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.dataset.tab;
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('active',x===b));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec-'+t).classList.add('active');
+    if(t==='preview') renderPreview();
+  });
+});
+
+async function loadCatalog(name){
+  try{
+    const r = await fetch(name+'.json', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+async function init(){
+  const [p,c] = await Promise.all([loadCatalog('catalog_parcel'), loadCatalog('catalog_cityplanning')]);
+  if(p && c){ catalogs.parcel=p; catalogs.cityplanning=c; onCatalogsReady(); }
+  else { showLoader(p, c); }
+}
+
+function showLoader(p, c){
+  document.getElementById('loader').style.display='block';
+  document.getElementById('status').textContent='กรุณาเลือกไฟล์ catalog ด้านล่าง';
+  document.getElementById('status').classList.add('err');
+  if(p) catalogs.parcel=p;
+  if(c) catalogs.cityplanning=c;
+  document.getElementById('f_parcel').addEventListener('change', e=>pickFile(e,'parcel'));
+  document.getElementById('f_city').addEventListener('change', e=>pickFile(e,'cityplanning'));
+  if(p && c) onCatalogsReady();
+}
+async function pickFile(e, key){
+  const f = e.target.files[0]; if(!f) return;
+  const txt = await f.text();
+  try{ catalogs[key] = JSON.parse(txt); }catch(err){ alert('ไฟล์ไม่ใช่ JSON: '+err.message); return; }
+  if(catalogs.parcel && catalogs.cityplanning) onCatalogsReady();
+}
+
+function onCatalogsReady(){
+  document.getElementById('loader').style.display='none';
+  const s = document.getElementById('status');
+  s.textContent='พร้อม — แก้ชื่อ/เลือกฟิลด์แล้วกด Save';
+  s.classList.remove('err');
+  buildState('parcel'); buildState('cityplanning');
+  renderSection('parcel'); renderSection('cityplanning');
+}
+
+function buildState(key){
+  const cat = catalogs[key];
+  const fixed = new Set(cat.fixed_fields || []);
+  state[key].clear();
+  for(const g of (cat.groups||[])){
+    for(const f of (g.fields||[])){
+      const isFixed = fixed.has(f.label);
+      state[key].set(f.source, {
+        checked: isFixed, name: f.label, fixed: isFixed, _field: f, _group: g.name,
+      });
+    }
+  }
+}
+
+function renderSection(key){
+  const cat = catalogs[key];
+  const host = document.getElementById(key==='parcel'?'groups-parcel':'groups-city');
+  host.innerHTML='';
+  for(const g of (cat.groups||[])){
+    const gEl = document.createElement('div'); gEl.className='group';
+    const gH = document.createElement('h3');
+    const chosenInG = g.fields.filter(f=>state[key].get(f.source).checked).length;
+    const gName = escapeHtml(g.name);
+    gH.innerHTML = `<span>${gName}</span><span class="g-count" data-group="${gName}">${chosenInG}/${g.fields.length}</span>`;
+    gEl.appendChild(gH);
+
+    const head = document.createElement('div'); head.className='field-head';
+    head.innerHTML = `<span>เลือก</span><span>Source (API)</span><span>คำอธิบาย</span><span>ชื่อฟิลด์ output</span><span class="type">Type</span>`;
+    gEl.appendChild(head);
+
+    for(const f of g.fields){
+      const st = state[key].get(f.source);
+      const row = document.createElement('div'); row.className='field'+(st.fixed?' locked':'');
+      const descTxt = (f.desc||'') + (f.example?` (เช่น ${f.example})`:'');
+      row.innerHTML = `
+        <input type="checkbox" ${st.checked?'checked':''} ${st.fixed?'disabled':''} title="${st.fixed?'fixed — ลบไม่ได้':''}" data-src="${escapeAttr(f.source)}">
+        <code>${escapeHtml(f.source)}</code>
+        <span class="desc" title="${escapeAttr(descTxt)}">${escapeHtml(descTxt||'—')}</span>
+        <input type="text" value="${escapeAttr(st.name)}" ${st.fixed?'disabled':''} data-src="${escapeAttr(f.source)}" maxlength="10">
+        <span class="type">${escapeHtml(f.type||'')}</span>
+      `;
+      gEl.appendChild(row);
+    }
+    host.appendChild(gEl);
+  }
+  host.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      state[key].get(cb.dataset.src).checked = cb.checked;
+      refreshGroupCounts(key);
+      updateCount(key);
+    });
+  });
+  host.querySelectorAll('input[type=text]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      state[key].get(inp.dataset.src).name = inp.value.trim();
+    });
+  });
+  updateCount(key);
+}
+
+function refreshGroupCounts(key){
+  const host = document.getElementById(key==='parcel'?'groups-parcel':'groups-city');
+  for(const g of catalogs[key].groups){
+    const picked = g.fields.filter(f=>state[key].get(f.source).checked).length;
+    const el = host.querySelector(`.g-count[data-group="${escapeAttr(g.name)}"]`);
+    if(el) el.textContent = `${picked}/${g.fields.length}`;
+  }
+}
+
+function updateCount(key){
+  const el = document.getElementById(key==='parcel'?'count-parcel':'count-city');
+  let total=0,picked=0;
+  for(const [,v] of state[key]){ total++; if(v.checked) picked++; }
+  el.textContent = `(เลือก ${picked}/${total})`;
+}
+
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+function buildUserSchema(){
+  const out = { _generated_by: 'schema_editor.html', _generated_at: new Date().toISOString() };
+  for(const key of ['parcel','cityplanning']){
+    const extras = [];
+    for(const [src,v] of state[key]){
+      if(!v.checked || v.fixed) continue;
+      if(!v.name) continue;
+      extras.push({ source: src, name: v.name });
+    }
+    out[key] = { extra_fields: extras };
+  }
+  return out;
+}
+
+function downloadJSON(obj, fname){
+  const blob = new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fname; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById('save-all').addEventListener('click',()=>downloadJSON(buildUserSchema(),'user_schema.json'));
+document.getElementById('save-preview').addEventListener('click',()=>downloadJSON(buildUserSchema(),'user_schema.json'));
+document.getElementById('copy-json').addEventListener('click', async ()=>{
+  await navigator.clipboard.writeText(JSON.stringify(buildUserSchema(),null,2));
+  const s=document.getElementById('status'); const old=s.textContent;
+  s.textContent='คัดลอก JSON แล้ว ✓'; setTimeout(()=>s.textContent=old, 2000);
+});
+
+document.getElementById('load-user').addEventListener('click',()=>document.getElementById('f_user').click());
+document.getElementById('f_user').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const txt = await f.text();
+  let data; try{ data = JSON.parse(txt);}catch(err){alert('JSON ไม่ถูกต้อง: '+err.message);return;}
+  for(const key of ['parcel','cityplanning']){
+    const section = data[key]; if(!section) continue;
+    const extras = section.extra_fields || [];
+    const unknown = [];
+    for(const [,v] of state[key]){ if(!v.fixed) { v.checked=false; v.name = v._field.label; } }
+    for(const row of extras){
+      const st = state[key].get(row.source);
+      if(!st){ unknown.push(row.source); continue; }
+      if(st.fixed) continue;
+      st.checked = true;
+      if(row.name) st.name = row.name;
+    }
+    if(unknown.length){
+      alert(`${key}: พบ source ${unknown.length} อันไม่มีใน catalog ปัจจุบัน:\n`+unknown.join('\n'));
+    }
+  }
+  renderSection('parcel'); renderSection('cityplanning');
+  const s=document.getElementById('status'); s.textContent='โหลด user_schema.json แล้ว ✓';
+});
+
+function selectAll(key, v){
+  for(const [,st] of state[key]){ if(!st.fixed) st.checked=v; }
+  renderSection(key);
+}
+function resetNames(key){
+  for(const [,st] of state[key]){ if(!st.fixed) st.name = st._field.label; }
+  renderSection(key);
+}
+document.getElementById('select-all-parcel').addEventListener('click',()=>selectAll('parcel',true));
+document.getElementById('clear-all-parcel').addEventListener('click',()=>selectAll('parcel',false));
+document.getElementById('reset-names-parcel').addEventListener('click',()=>resetNames('parcel'));
+document.getElementById('select-all-city').addEventListener('click',()=>selectAll('cityplanning',true));
+document.getElementById('clear-all-city').addEventListener('click',()=>selectAll('cityplanning',false));
+document.getElementById('reset-names-city').addEventListener('click',()=>resetNames('cityplanning'));
+
+function renderPreview(){
+  document.getElementById('preview').textContent = JSON.stringify(buildUserSchema(), null, 2);
+}
+
+init();
+</script>
+</body>
+</html>
