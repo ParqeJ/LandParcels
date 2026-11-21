@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from landsmaps.api import (QuotaExceeded, check_token, load_detail_cache, open_detail_cache,
+from landsmaps.api import (QuotaExceeded, check_token, is_match, load_detail_cache,
+                            open_detail_cache,
                            read_token, token_expiry)
 
 
@@ -59,3 +60,28 @@ def test_truncated_detail_line_is_skipped_and_next_append_starts_new_line(tmp_pa
     with open_detail_cache(f) as fh:
         fh.write('{"seq": "3", "info": null}\n')
     assert load_detail_cache(f) == {"1": None, "3": None}
+
+
+# ─────────────────── cache ที่มีหลายบรรทัดต่อแปลง (ดึงซ้ำด้วยจุดค้นใหม่) ───────────────────
+
+def test_is_match_compares_parcel_seq_as_text():
+    assert is_match("1", {"parcel_seq": "1"})
+    assert is_match(1, {"parcel_seq": 1})
+    assert not is_match("1", {"parcel_seq": "9"})
+    assert not is_match("1", None)
+
+
+def test_detail_cache_keeps_the_matching_record(tmp_path):
+    """บรรทัดแรกชี้ผิดแปลง บรรทัดหลังตรงแปลง -> เอาผลที่ตรงแปลง"""
+    f = tmp_path / "d.jsonl"
+    f.write_text('{"seq": "1", "info": {"parcel_seq": "9"}}\n'
+                 '{"seq": "1", "info": {"parcel_seq": "1"}}\n', encoding="utf-8")
+    assert load_detail_cache(f) == {"1": {"parcel_seq": "1"}}
+
+
+def test_detail_cache_does_not_overwrite_a_matching_record(tmp_path):
+    """เคยได้ผลที่ตรงแปลงแล้ว บรรทัดที่เขียนทีหลังต้องไม่มาทับ"""
+    f = tmp_path / "d.jsonl"
+    f.write_text('{"seq": "1", "info": {"parcel_seq": "1"}}\n'
+                 '{"seq": "1", "info": null}\n', encoding="utf-8")
+    assert load_detail_cache(f) == {"1": {"parcel_seq": "1"}}

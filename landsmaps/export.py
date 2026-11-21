@@ -12,6 +12,7 @@ NS3K = "น.ส.3ก"
 REMARK_PENDING = "ยังไม่ได้ดึงรายละเอียด"
 REMARK_NOT_FOUND = "ไม่พบรายละเอียดใน LandsMaps"
 REMARK_MISMATCH = "ตำแหน่งชี้ไปแปลงอื่น"
+REMARK_COVERED = "ถูกแปลงอื่นทับทั้งหมด"
 SHP_PARTS = (".shp", ".shx", ".dbf", ".prj", ".cpg")
 
 
@@ -44,7 +45,8 @@ def detail_row(land_no, info: dict, cert_no: str) -> dict:
     return row
 
 
-def parcel_row(parcel_seq, land_no, details: dict) -> dict:
+def parcel_row(parcel_seq, land_no, details: dict, covered: bool = False) -> dict:
+    """covered = แปลงนี้ถูกแปลงอื่นทับทั้งใบ ยิงพิกัดไปตรงไหนก็ได้รายละเอียดของแปลงอื่น"""
     key = str(parcel_seq)
     if key not in details:
         return empty_row(land_no, DEED, REMARK_PENDING)
@@ -52,7 +54,7 @@ def parcel_row(parcel_seq, land_no, details: dict) -> dict:
     if not info:
         return empty_row(land_no, DEED, REMARK_NOT_FOUND)
     if str(info.get("parcel_seq")) != key:
-        return empty_row(land_no, DEED, REMARK_MISMATCH)
+        return empty_row(land_no, DEED, REMARK_COVERED if covered else REMARK_MISMATCH)
     return detail_row(land_no, info, info.get("parcelno") or "")
 
 

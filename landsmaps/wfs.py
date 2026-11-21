@@ -80,13 +80,30 @@ def _read_cache(path: Path) -> dict | None:
         return None
 
 
+def feature_geom(f: dict):
+    """รูปแปลงของ 1 feature ซ่อมรูปที่ไม่ valid ให้ใช้งานต่อได้"""
+    g = shape(f["geometry"])
+    return g if g.is_valid else g.buffer(0)
+
+
+def parcel_items(feats: list) -> list[tuple[str, object]]:
+    """(parcel_seq, รูปแปลง) ของทุกแปลงที่ดึงมา — ไม่ตัดด้วยกรอบพื้นที่
+
+    ใช้เป็นดัชนีหาแปลงที่ซ้อนทับใน probe.py เพราะแปลงที่ทับอยู่อาจอยู่นอกกรอบพื้นที่ก็ได้
+    """
+    out: dict[str, object] = {}
+    for f in feats:
+        g = feature_geom(f)
+        if not g.is_empty:
+            out.setdefault(str(f["properties"]["parcel_seq"]), g)
+    return list(out.items())
+
+
 def clip(feats: list, area: Area) -> gpd.GeoDataFrame:
     """เก็บเฉพาะแปลงที่แตะกรอบพื้นที่ ตัดแปลงซ้ำ (แปลงคร่อมระวาง)"""
     rows, seen = [], set()
     for f in feats:
-        g = shape(f["geometry"])
-        if not g.is_valid:
-            g = g.buffer(0)
+        g = feature_geom(f)
         seq = int(f["properties"]["parcel_seq"])
         if g.is_empty or seq in seen or not g.intersects(area.native):
             continue

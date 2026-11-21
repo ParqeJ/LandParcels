@@ -103,8 +103,16 @@ class LandsMapsAPI:
 
 # ─────────────────────────── cache รายแปลง ───────────────────────────
 
+def is_match(seq, info: dict | None) -> bool:
+    """ผลที่ได้เป็นของแปลงที่ถามจริงไหม (จุดที่ยิงไปอาจตกในบริเวณที่แปลงซ้อนกัน -> ได้แปลงอื่น)"""
+    return bool(info) and str(info.get("parcel_seq")) == str(seq)
+
+
 def load_detail_cache(path: Path) -> dict:
-    """{parcel_seq: info} จากไฟล์ .jsonl (info = None คือค้นแล้วไม่พบ)"""
+    """{parcel_seq: info} จากไฟล์ .jsonl (info = None คือค้นแล้วไม่พบ)
+
+    1 แปลงอาจมีหลายบรรทัด (ดึงซ้ำด้วยจุดค้นใหม่) ถ้าเคยได้ผลที่ตรงแปลงแล้วจะเก็บผลนั้นไว้
+    """
     if not path.exists():
         return {}
     out = {}
@@ -113,7 +121,10 @@ def load_detail_cache(path: Path) -> dict:
             continue
         try:
             rec = json.loads(line)
-            out[rec["seq"]] = rec["info"]
+            seq, info = rec["seq"], rec["info"]
+            if seq in out and is_match(seq, out[seq]):   # ของเดิมตรงแปลงอยู่แล้ว ไม่ต้องทับ
+                continue
+            out[seq] = info
         except (ValueError, KeyError):              # บรรทัดเขียนไม่จบ (โปรแกรมถูกหยุดกลางทาง) -> ข้าม
             print(f"  ข้ามบรรทัด {n} ที่เสียใน {path.name} (แปลงนั้นจะถูกดึงใหม่)")
     return out

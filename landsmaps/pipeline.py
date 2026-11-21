@@ -9,12 +9,13 @@ import geopandas as gpd
 import requests
 from shapely.ops import unary_union
 
-from .api import (LandsMapsAPI, QuotaExceeded, check_token, load_detail_cache,
+from .api import (LandsMapsAPI, QuotaExceeded, check_token, is_match, load_detail_cache,
                   open_detail_cache, read_token)
 from .area import Area, load_area
 from .config import CACHE_DIR, LOG_EVERY, OUTPUT_DIR, SLEEP_SEC
 from .export import NS3K, REMARK_PENDING, empty_row, parcel_row, to_shp
-from .wfs import clip, fetch_features, find_sheets
+from .probe import Item, Probe, probe_parcels, summarize
+from .wfs import clip, fetch_features, find_sheets, parcel_items
 
 
 @dataclass(frozen=True)
@@ -28,7 +29,16 @@ class Result:
     quota_hit: bool
 
 
-def fetch_geometries(area: Area, cache_dir: Path) -> dict[str, gpd.GeoDataFrame]:
+@dataclass(frozen=True)
+class Geometries:
+    """ผลขั้น 1: รูปแปลงที่จะใช้ทำงาน + รูปแปลงทั้งหมดที่ดึงมา (ไว้หาแปลงที่ซ้อนทับ)"""
+
+    parcel: gpd.GeoDataFrame
+    ns3k: gpd.GeoDataFrame
+    context: list[Item]
+
+
+def fetch_geometries(area: Area, cache_dir: Path) -> Geometries:
     """ขั้น 1: หาระวาง -> รูปแปลงโฉนด + น.ส.3ก ที่แตะกรอบพื้นที่"""
     sheets = find_sheets(area.zone, area.bbox)
     print(f"  ระวาง: {', '.join(sheets)}")
@@ -36,36 +46,63 @@ def fetch_geometries(area: Area, cache_dir: Path) -> dict[str, gpd.GeoDataFrame]
         "parcel": (area.zone.parcel_layer, sheets),                        # โฉนดใช้ 5 หลัก
         "ns3k": (area.zone.ns3k_layer, sorted({s[:4] for s in sheets})),   # น.ส.3ก ใช้ 4 หลัก
     }
-    gdfs = {}
+    gdfs, context = {}, []
     for kind, (layer, vps) in layers.items():
-        g = clip(fetch_features(layer, vps, area, cache_dir, kind), area)
+        feats = fetch_features(layer, vps, area, cache_dir, kind)
+        if kind == "parcel":
+            context = parcel_items(feats)       # ได้มาฟรีจากที่ดึงแล้ว ไม่เสียโควตาเพิ่ม
+        g = clip(feats, area)
         covered = unary_union(list(g.geometry)).intersection(area.native).area / area.native.area if len(g) else 0
         print(f"  {kind}: {len(g):,} แปลงแตะกรอบ (ครอบคลุม {covered:.0%} ของพื้นที่)")
         gdfs[kind] = g
-    return gdfs
+    return Geometries(gdfs["parcel"], gdfs["ns3k"], context)
 
 
-def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: LandsMapsAPI) -> bool:
+def needs_detail(seq: str, details: dict, refetch: str) -> bool:
+    """แปลงนี้ต้องยิงถาม API ไหม (ผลใน cache ที่ตรงแปลงแล้ว ไม่ยิงซ้ำให้เปลืองโควตา)"""
+    if seq not in details:
+        return True
+    info = details[seq]
+    if is_match(seq, info):
+        return False
+    kind = "notfound" if not info else "mismatch"
+    return refetch in (kind, "both")
+
+
+def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: LandsMapsAPI,
+                  probes: dict[str, Probe], *, refetch: str = "none") -> bool:
     """ขั้น 2: รายละเอียดโฉนดทีละแปลง ต่อท้าย cache_file คืน True ถ้าต้องหยุดก่อนครบ (โควตาเต็ม/เน็ตล่ม)"""
     details = load_detail_cache(cache_file)
-    todo = parcels[~parcels["parcel_seq"].astype(str).isin(details)]
-    print(f"  รายละเอียด: มี cache {len(details):,} แปลง  เหลือ {len(todo):,} แปลง")
+    todo = [row for row in parcels.itertuples()
+            if needs_detail(str(row.parcel_seq), details, refetch)]
+    again = sum(1 for row in todo if str(row.parcel_seq) in details)
+    note = f" (ในนั้นเป็นการดึงซ้ำด้วยจุดใหม่ {again:,})" if again else ""
+    print(f"  รายละเอียด: มี cache {len(details):,} แปลง  เหลือ {len(todo):,} แปลง{note}")
     t0 = time.time()
     with open_detail_cache(cache_file) as fh:
-        for i, row in enumerate(todo.itertuples(), 1):
-            p = row.geometry.representative_point()
-            lon, lat = area.zone.transformer.transform(p.x, p.y, direction="INVERSE")
-            try:
-                info = api.parcel_at(lat, lon)
-            except QuotaExceeded as e:
-                print(f"  หยุด: LandsMaps แจ้ง [{e}] -> ดึงได้ {i - 1:,} แปลงในรอบนี้ "
-                      "รันใหม่วันพรุ่งนี้ (หรือใส่ token ใหม่) จะทำต่อจากเดิม")
-                return True
-            except requests.RequestException as e:   # ลองซ้ำครบแล้วยังไม่ได้ -> หยุดแต่ยังบันทึก Shapefile
-                print(f"  หยุด: ติดต่อ LandsMaps ไม่ได้ ({e}) -> ดึงได้ {i - 1:,} แปลง รันใหม่จะทำต่อจากเดิม")
-                return True
-            fh.write(json.dumps({"seq": str(row.parcel_seq), "info": info}, ensure_ascii=False) + "\n")
-            fh.flush()
+        for i, row in enumerate(todo, 1):
+            seq = str(row.parcel_seq)
+            probe = probes.get(seq)
+            points = probe.points if probe else (row.geometry.representative_point(),)
+            for n, pt in enumerate(points, 1):
+                if n > 1:
+                    time.sleep(SLEEP_SEC)       # ผลเพิ่งไม่ตรงแปลง -> ลองจุดสำรองถัดไป
+                lon, lat = area.zone.transformer.transform(pt.x, pt.y, direction="INVERSE")
+                try:
+                    info = api.parcel_at(lat, lon)
+                except QuotaExceeded as e:
+                    print(f"  หยุด: LandsMaps แจ้ง [{e}] -> ดึงได้ {i - 1:,} แปลงในรอบนี้ "
+                          "รันใหม่วันพรุ่งนี้ (หรือใส่ token ใหม่) จะทำต่อจากเดิม")
+                    return True
+                except requests.RequestException as e:   # ลองซ้ำครบแล้วยังไม่ได้ -> หยุดแต่ยังบันทึก Shapefile
+                    print(f"  หยุด: ติดต่อ LandsMaps ไม่ได้ ({e}) -> ดึงได้ {i - 1:,} แปลง รันใหม่จะทำต่อจากเดิม")
+                    return True
+                fh.write(json.dumps({"seq": seq, "info": info, "try": n,
+                                     "pt": [round(lon, 8), round(lat, 8)]},
+                                    ensure_ascii=False) + "\n")
+                fh.flush()
+                if is_match(seq, info):
+                    break
             if i % LOG_EVERY == 0 or i == len(todo):
                 rate = (time.time() - t0) / i
                 print(f"    {i:,}/{len(todo):,}  เหลือ ~{rate * (len(todo) - i) / 60:.0f} นาที")
@@ -73,7 +110,8 @@ def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: 
     return False
 
 
-def export(gdfs: dict, area: Area, cache_file: Path, out_dir: Path) -> tuple:
+def export(geoms: Geometries, area: Area, cache_file: Path, out_dir: Path,
+           probes: dict[str, Probe]) -> tuple:
     """ขั้น 3: Shapefile 14 attributes"""
     details = load_detail_cache(cache_file)
     folder = out_dir / area.name
@@ -81,15 +119,22 @@ def export(gdfs: dict, area: Area, cache_file: Path, out_dir: Path) -> tuple:
     parcel_file = folder / f"{area.name}_parcel_{suffix}.shp"
     ns3k_file = folder / f"{area.name}_ns3k_{suffix}.shp"
 
-    parcels, ns3k = gdfs["parcel"], gdfs["ns3k"]
-    out_parcel = to_shp([parcel_row(r.parcel_seq, r.land_no, details) for r in parcels.itertuples()],
+    parcels, ns3k = geoms.parcel, geoms.ns3k
+    out_parcel = to_shp([parcel_row(r.parcel_seq, r.land_no, details,
+                                    covered=is_covered(probes, r.parcel_seq))
+                         for r in parcels.itertuples()],
                         parcels.geometry, parcels.crs, parcel_file)
     out_ns3k = to_shp([empty_row(r.land_no, NS3K, "") for r in ns3k.itertuples()],
                       ns3k.geometry, ns3k.crs, ns3k_file)
     return parcel_file, ns3k_file, out_parcel, out_ns3k
 
 
-def run_area(path, *, layer=None, name=None, fetch_detail=True,
+def is_covered(probes: dict[str, Probe], parcel_seq) -> bool:
+    probe = probes.get(str(parcel_seq))
+    return bool(probe and probe.covered)
+
+
+def run_area(path, *, layer=None, name=None, fetch_detail=True, refetch="none",
              out_dir: Path = OUTPUT_DIR, cache_dir: Path = CACHE_DIR) -> Result:
     """ดึงแปลงที่ดินทั้งหมดในไฟล์ขอบเขต `path` แล้วบันทึกเป็น Shapefile"""
     area = load_area(Path(path), layer=layer, name=name)
@@ -98,15 +143,19 @@ def run_area(path, *, layer=None, name=None, fetch_detail=True,
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = cache_dir / f"{area.name}_detail.jsonl"
 
-    gdfs = fetch_geometries(area, cache_dir)
+    geoms = fetch_geometries(area, cache_dir)
+    probes = probe_parcels(geoms.parcel, geoms.context)
+    if len(geoms.parcel):
+        print(f"  จุดค้น: {summarize(probes)}")
 
     quota_hit = False
-    if fetch_detail and len(gdfs["parcel"]):
+    if fetch_detail and len(geoms.parcel):
         token = read_token()
         print(f"  {check_token(token)}")
-        quota_hit = fetch_details(gdfs["parcel"], area, cache_file, LandsMapsAPI(token))
+        quota_hit = fetch_details(geoms.parcel, area, cache_file, LandsMapsAPI(token), probes,
+                                  refetch=refetch)
 
-    parcel_file, ns3k_file, out_parcel, out_ns3k = export(gdfs, area, cache_file, out_dir)
+    parcel_file, ns3k_file, out_parcel, out_ns3k = export(geoms, area, cache_file, out_dir, probes)
     pending = int((out_parcel["Remark"] == REMARK_PENDING).sum())
     _report(parcel_file, len(out_parcel), f" (ยังไม่มีรายละเอียด {pending:,})" if pending else "")
     _report(ns3k_file, len(out_ns3k))

@@ -5,6 +5,7 @@
     python fetch_parcels.py                    # ทุกไฟล์ในโฟลเดอร์ areas/
     python fetch_parcels.py areas/my_site.kmz  # เฉพาะไฟล์ที่ระบุ
     python fetch_parcels.py --no-detail        # เอาแค่รูปแปลง ไม่ใช้โควตา API
+    python fetch_parcels.py --refetch mismatch # ดึงซ้ำเฉพาะแปลงที่ผลเดิมชี้ไปแปลงอื่น
 
 ผลลัพธ์: output/<ชื่อไฟล์>/<ชื่อไฟล์>_parcel_epsg240xx.shp และ _ns3k_epsg240xx.shp
 """
@@ -16,7 +17,7 @@ from pathlib import Path
 from landsmaps import run_area
 from landsmaps.api import QuotaExceeded, check_token, read_token
 from landsmaps.area import find_area_files
-from landsmaps.config import AREA_SUFFIXES, AREAS_DIR, TOKEN_FILE
+from landsmaps.config import AREA_SUFFIXES, AREAS_DIR, REFETCH_CHOICES, TOKEN_FILE
 from landsmaps.keystore import KeyFileError
 from landsmaps.login import LoginError, ensure_token
 
@@ -27,6 +28,10 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help=f"ไฟล์ขอบเขต ({', '.join(AREA_SUFFIXES)}, .gdb) ไม่ใส่ = ทุกไฟล์ใน {AREAS_DIR.name}/")
     p.add_argument("--no-detail", action="store_true",
                    help="ข้ามการดึงรายละเอียดรายแปลง (ไร่-งาน-วา ฯลฯ) เอาแค่รูปแปลง + เลขที่ดิน")
+    p.add_argument("--refetch", choices=REFETCH_CHOICES, default="none",
+                   help="ดึงซ้ำด้วยจุดค้นใหม่เฉพาะแปลงที่ผลเดิมใช้ไม่ได้ "
+                        "(mismatch = ผลชี้ไปแปลงอื่น, notfound = ไม่พบรายละเอียด, both = ทั้งสอง) "
+                        "ใช้โควตาเพิ่มเท่าจำนวนแปลงนั้น")
     p.add_argument("--layer", help="ชื่อ layer ที่ใช้ (ถ้าไฟล์มีหลาย layer ไม่ใส่ = รวม polygon ทุก layer)")
     p.add_argument("--name", help="ชื่อพื้นที่สำหรับตั้งชื่อไฟล์ผลลัพธ์ (ใช้ได้เมื่อระบุไฟล์เดียว)")
     args = p.parse_args(argv)
@@ -67,7 +72,8 @@ def main(argv=None) -> int:
     failed = []
     for path in files:
         try:
-            result = run_area(path, layer=args.layer, name=args.name, fetch_detail=fetch_detail)
+            result = run_area(path, layer=args.layer, name=args.name,
+                              fetch_detail=fetch_detail, refetch=args.refetch)
         except Exception as e:                      # พื้นที่หนึ่งพัง ไม่ให้พื้นที่อื่นหยุดตาม
             print(f"[{path.name}] ผิดพลาด: {e}")
             failed.append(path.name)

@@ -3,7 +3,7 @@ import pytest
 from shapely.geometry import box
 
 from landsmaps.config import FIELDS
-from landsmaps.export import (REMARK_MISMATCH, REMARK_NOT_FOUND, REMARK_PENDING,
+from landsmaps.export import (REMARK_COVERED, REMARK_MISMATCH, REMARK_NOT_FOUND, REMARK_PENDING,
                               parcel_row, rawang, status, to_shp)
 
 INFO = {
@@ -59,3 +59,16 @@ def test_to_shp_empty_writes_nothing_and_removes_stale_file(tmp_path):
     out = to_shp([], [], 24047, path)
     assert len(out) == 0
     assert not list(tmp_path.glob("x.*"))
+
+
+def test_covered_parcel_gets_its_own_remark():
+    """ถูกแปลงอื่นทับทั้งใบ -> ระบุสาเหตุให้ชัด ไม่ปนกับตำแหน่งคลาดธรรมดา"""
+    details = {"123": {**INFO, "parcel_seq": "999"}}
+    assert parcel_row(123, "45", details, covered=True)["Remark"] == REMARK_COVERED
+    assert parcel_row(123, "45", details)["Remark"] == REMARK_MISMATCH
+
+
+def test_covered_flag_does_not_change_a_good_row():
+    row = parcel_row(123, "45", {"123": INFO}, covered=True)
+    assert row["Remark"] == ""
+    assert row["Cert_No"] == "xxxx19"

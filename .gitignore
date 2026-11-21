@@ -26,3 +26,6 @@ __pycache__/
 .coverage
 .venv/
 venv/
+
+# ── Claude Code: ตั้งค่าเฉพาะเครื่อง ──
+.claude/settings.local.json

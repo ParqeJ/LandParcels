@@ -28,7 +28,7 @@ def test_fetch_parcels_continues_after_failure_and_stops_detail_after_quota(monk
     class QuotaHit:
         quota_hit = True
 
-    def fake_run(path, *, layer, name, fetch_detail):
+    def fake_run(path, *, layer, name, fetch_detail, refetch="none"):
         seen.append((path.name, fetch_detail))
         if path.name == "bad.kmz":
             raise ValueError("boom")
