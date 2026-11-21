@@ -1,0 +1,3268 @@
+{
+ "type": "CIMLayerDocument",
+ "version": "2.9.0",
+ "build": 32739,
+ "layers": [
+  "CIMPATH=cityplanning/cityplanning_pl_use.xml"
+ ],
+ "layerDefinitions": [
+  {
+   "type": "CIMFeatureLayer",
+   "name": "ผังเมืองรวม (PL_USE)",
+   "uRI": "CIMPATH=cityplanning/cityplanning_pl_use.xml",
+   "useSourceMetadata": true,
+   "expanded": true,
+   "layerType": "Operational",
+   "showLegends": true,
+   "visibility": true,
+   "displayCacheType": "Permanent",
+   "maxDisplayCacheAge": 5,
+   "showPopups": true,
+   "serviceLayerID": -1,
+   "refreshRate": -1,
+   "refreshRateUnit": "esriTimeUnitsSeconds",
+   "autoGenerateFeatureTemplates": true,
+   "featureElevationExpression": "0",
+   "featureTable": {
+    "type": "CIMFeatureTable",
+    "displayField": "PL_USE_TH",
+    "editable": true,
+    "dataConnection": {
+     "type": "CIMStandardDataConnection",
+     "workspaceConnectionString": "DATABASE=D:\\ANISPOWER\\LandParcels\\output\\cityplanning\\36_ชัยภูมิ",
+     "workspaceFactory": "Shapefile",
+     "dataset": "36_ชัยภูมิ_cityplanning_epsg24047.shp",
+     "datasetType": "esriDTFeatureClass"
+    },
+    "studyAreaSpatialRel": "esriSpatialRelUndefined",
+    "searchOrder": "esriSearchOrderSpatial"
+   },
+   "htmlPopupEnabled": true,
+   "selectable": true,
+   "featureCacheType": "Session",
+   "scaleSymbols": true,
+   "snappable": true,
+   "renderer": {
+    "type": "CIMUniqueValueRenderer",
+    "fields": [
+     "PL_USE"
+    ],
+    "defaultLabel": "<ประเภทอื่น ๆ>",
+    "defaultSymbol": {
+     "type": "CIMSymbolReference",
+     "symbol": {
+      "type": "CIMPolygonSymbol",
+      "symbolLayers": [
+       {
+        "type": "CIMSolidStroke",
+        "enable": true,
+        "capStyle": "Round",
+        "joinStyle": "Round",
+        "lineStyle3D": "Strip",
+        "miterLimit": 10,
+        "width": 0,
+        "color": {
+         "type": "CIMRGBColor",
+         "values": [
+          0,
+          0,
+          0,
+          0
+         ]
+        }
+       },
+       {
+        "type": "CIMSolidFill",
+        "enable": true,
+        "color": {
+         "type": "CIMRGBColor",
+         "values": [
+          204,
+          204,
+          204,
+          100
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "defaultSymbolPatch": "Default",
+    "useDefaultSymbol": true,
+    "polygonSymbolColorTarget": "Fill",
+    "groups": [
+     {
+      "type": "CIMUniqueValueGroup",
+      "heading": "PL_USE_TH",
+      "classes": [
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่อยู่อาศัยหนาแน่นน้อย",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "1110"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่อยู่อาศัยหนาแน่นปานกลาง",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              140,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "1120"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่อยู่อาศัยหนาแน่นมาก",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              177,
+              126,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "1130"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์เพื่อการอยู่อาศัย",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 1,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "1600"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "พาณิชยกรรมและที่อยู่อาศัยหนาแน่นมาก",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              0,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "2000"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อุตสาหกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              144,
+              0,
+              175,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3100"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อุตสาหกรรมและคลังสินค้า",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              197,
+              0,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3200"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "คลังสินค้า",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              0,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3300"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อุตสาหกรรมเฉพาะกิจ",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              197,
+              140,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3400"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อุตสาหกรรมทั่วไปที่ไม่เป็นมลพิษต่อชุมชนหรือสิ่งแวดล้อมและคลังสินค้า",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              76,
+              0,
+              76,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.82,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              191,
+              0,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3500"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อุตสาหกรรมและคลังสินค้าและเกษตรกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 191,
+                 0,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              56,
+              168,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3600"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ชุมชน",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              246,
+              138,
+              158,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "4400"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "รักษาคุณภาพและสิ่งแวดล้อม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              140,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "5500"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "สถาบันการศึกษา",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              102,
+              129,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6100"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "สถาบันศาสนา",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              181,
+              181,
+              179,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6200"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "สถาบันราชการ การสาธารณูปโภคและสาธารณูปการ",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              140,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6300"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เขตทหาร",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6700"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ปฏิรูปที่ดินเพื่อเกษตรกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              127,
+              79,
+              63,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 58,
+                 168,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              168,
+              56,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7110"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์ป่าไม้",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 1,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.28,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 135,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              76,
+              230,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7180"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์ทรัพยากรธรรมชาติและการรักษาคุณภาพสิ่งแวดล้อม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 230,
+                 152,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              151,
+              219,
+              242,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7181"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์สภาพแวดล้อมเพื่อการท่องเที่ยว",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 58,
+                 168,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7190"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์เพื่อส่งเสริมเอกลักษณ์ศิลปวัฒธรรมไทย",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              232,
+              162,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7200"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อนันทนาการและการรักษาคุณภาพสิ่งแวดล้อม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              102,
+              255,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7350"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อนันทนาการและการรักษาคุณภาพสิ่งแวดล้อมชายฝั่งทะเล",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              151,
+              219,
+              242,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7351"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อการรักษาคุณภาพสิ่งแวดล้อมการท่องเที่ยว และการประมง",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              161,
+              223,
+              241,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7360"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อนัทนาการ การเลี้ยงสัตว์และรักษาคุณภาพสิ่งแวดล้อม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 85,
+                 255,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7370"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อการรักษาคุณภาพสิ่งแวดล้อม (7361)",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              161,
+              223,
+              241,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7380"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่สงวนเพื่อนันทนาการ และการรักษาคุณภาพสิ่งแวดล้อม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              165,
+              41,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 230,
+                 152,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              58,
+              168,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7410"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "สงวนไว้เพื่อรักษาสภาพป่าชายเลน",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 85,
+                 255,
+                 0,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              156,
+              156,
+              156,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7420"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ชนบทและเกษตรกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 1,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              77,
+              177,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "8600"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "อนุรักษ์ชนบทและเกษตรกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.82,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              58,
+              168,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "8700"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ชนบทและปศุสัตว์",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              194,
+              158,
+              215,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 194,
+                 158,
+                 215,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              58,
+              168,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "8900"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เสี่ยงอุทกภัย",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              151,
+              219,
+              242,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "9520"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "จัดรูปที่ดินเพื่อเกษตรกรรม",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 5,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              151,
+              219,
+              242,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 151,
+                 219,
+                 242,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              58,
+              168,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "9700"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "โครงการคมนาคมและขนส่ง",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              246,
+              138,
+              158,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "9994"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เสี่ยงอุทกภัย",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 2.94,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 6
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              151,
+              219,
+              242,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "9810"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "พาณิชยกรรมและสถานบริการ",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "2001"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ศูนย์กลางพาณิชยกรรม EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              230,
+              0,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "2100"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เขตส่งเสริมเศรษฐกิจพิเศษเพื่อกิจการอุตสาหกรรม  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              197,
+              0,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3101"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "พัฒนาอุตสาหกรรม  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              223,
+              115,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3102"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ท่าเรือและคลังสินค้า",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              0,
+              191,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "3310"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ชุมชนเมือง  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              170,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "4403"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "รองรับการพัฒนาเมือง  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              211,
+              127,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "4404"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ชุมชนชนบท  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              210,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "4405"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เขตส่งเสริมเศรษฐกิจพิเศษเพื่อกิจการพิเศษ  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.3,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              115,
+              76,
+              0,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6900"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "เขตส่งเสริมเศรษฐกิจพิเศษเพื่อกิจการพิเศษ",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 1,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              255,
+              255,
+              255,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "6901"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่พระราชกฤษฎีกากำหนดให้เป็นเขตปฏิรูปที่ดิน  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.3,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 1,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 0,
+                 191,
+                 89,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 135,
+            "separation": 5
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7111"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อการรักษาคุณภาพสิ่งแวดล้อม  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 1,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 115,
+                 223,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 135,
+            "separation": 5
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7352"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ที่โล่งเพื่อการรักษาคุณภาพสิ่งแวดล้อมและพื้นที่ชุ่มน้ำ",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMHatchFill",
+            "enable": true,
+            "lineSymbol": {
+             "type": "CIMLineSymbol",
+             "symbolLayers": [
+              {
+               "type": "CIMSolidStroke",
+               "enable": true,
+               "capStyle": "Round",
+               "joinStyle": "Round",
+               "lineStyle3D": "Strip",
+               "miterLimit": 10,
+               "width": 1,
+               "color": {
+                "type": "CIMRGBColor",
+                "values": [
+                 255,
+                 255,
+                 255,
+                 100
+                ]
+               }
+              }
+             ]
+            },
+            "rotation": 45,
+            "separation": 5
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "7390"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "CIMUniqueValueClass",
+        "label": "ส่งเสริมเกษตรกรรม  EEC",
+        "patch": "Default",
+        "symbol": {
+         "type": "CIMSymbolReference",
+         "symbol": {
+          "type": "CIMPolygonSymbol",
+          "symbolLayers": [
+           {
+            "type": "CIMSolidStroke",
+            "enable": true,
+            "capStyle": "Round",
+            "joinStyle": "Round",
+            "lineStyle3D": "Strip",
+            "miterLimit": 10,
+            "width": 0.4,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              0,
+              0,
+              0,
+              100
+             ]
+            }
+           },
+           {
+            "type": "CIMSolidFill",
+            "enable": true,
+            "color": {
+             "type": "CIMRGBColor",
+             "values": [
+              209,
+              255,
+              115,
+              100
+             ]
+            }
+           }
+          ]
+         }
+        },
+        "visible": true,
+        "values": [
+         {
+          "type": "CIMUniqueValue",
+          "fieldValues": [
+           "8001"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "rGBColorProfile": "sRGB IEC61966-2.1",
+ "cMYKColorProfile": "U.S. Web Coated (SWOP) v2"
+}
