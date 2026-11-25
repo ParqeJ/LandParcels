@@ -185,6 +185,23 @@ OTHER=stay
                      "LANDSMAPS_PASSWORD=pw"]
 
 
+def test_remove_env_keeps_other_lines(tmp_path):
+    f = tmp_path / ".env"
+    f.write_text("# keep\nLANDSMAPS_DGA_ID=1\nOTHER=stay\nLANDSMAPS_PASSWORD=pw\n", encoding="utf-8")
+    lg.remove_env(("LANDSMAPS_DGA_ID", "LANDSMAPS_PASSWORD"), f)
+    assert f.read_text(encoding="utf-8").splitlines() == ["# keep", "OTHER=stay"]
+
+
+def test_forget_credentials_clears_password_everywhere(tmp_path):
+    token, env = tmp_path / "Access_Key.txt", tmp_path / ".env"
+    lg.keystore.save(token, kind="openid", user="123", key="tok", **{"pass": "pw"})
+    lg.write_env({"LANDSMAPS_DGA_ID": "123", "LANDSMAPS_PASSWORD": "pw"}, env)
+    lg.forget_credentials(token, env)
+    saved = lg.keystore.load(token)
+    assert "pass" not in saved and saved["key"] == "tok"
+    assert lg.read_env(env) == {}
+
+
 def test_write_env_ignores_commented_key(tmp_path):
     f = tmp_path / ".env"
     f.write_text("# LANDSMAPS_DGA_ID=example", encoding="utf-8")

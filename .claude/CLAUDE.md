@@ -17,6 +17,8 @@ Python tool ดึง **แปลงที่ดินโฉนด + น.ส.3�
 | **[../docs/setup.md](../docs/setup.md)** | โครงสร้างโปรเจกต์, secrets, dependencies, กฎทั่วไป, CRS, test — **อ่านเสมอก่อนเริ่มงานใหม่** |
 | **[../docs/parcel.md](../docs/parcel.md)** | ทำงานกับ `fetch_parcels.py`, `search_parcel.py`, 14-field schema โฉนด/น.ส.3ก, DGA token, quota |
 | **[../docs/cityplanning.md](../docs/cityplanning.md)** | ทำงานกับ `fetch_cityplanning.py` (เดิมชื่อ landuse), 12-field schema ผังเมือง, ArcGIS token, identify/query |
+| **[../docs/dashboard.md](../docs/dashboard.md)** | ทำงานกับ `dashboard/` (FastAPI + หน้าเว็บ): input อัปโหลด/ลบ, schema, run, monitor, output, หน้า 📖 คู่มือ |
+| **[../docs/schema.md](../docs/schema.md)** | `schema/catalog_*.json`, `user_schema.json`, กฎตั้งชื่อฟิลด์เสริม (≤10, ห้ามซ้ำ/ชน fixed) |
 
 **สำรอง (Claude-focused brief guides — มีทั้งคู่ไว้เผื่อค้นหาตรงนี้):**
 
@@ -28,7 +30,7 @@ Python tool ดึง **แปลงที่ดินโฉนด + น.ส.3�
 
 1. **ห้ามรัน `fetch_parcels.py` / `get_token.py` / `fetch_cityplanning.py` เอง** — ใช้ quota/token ของบัญชีผู้ใช้
 2. **ห้ามเผย/log ค่า** ใน `.env`, `Access_Key.txt` (secrets)
-3. **ห้ามเพิ่ม/ลบฟิลด์** schema 14 ฟิลด์ parcel หรือ 12 ฟิลด์ cityplanning (จะทำ merge พัง)
+3. **ค่าเริ่มต้นต้องคง preset เดิมไว้เพื่อ merge** — parcel 14 ฟิลด์ (merge กับ CBD/BNN) · cityplanning 12 ฟิลด์ (ชื่อเดิม) เป็น **ค่าเริ่มต้น** ที่ merge ได้ · ผู้ใช้ติ๊กออก/เปลี่ยนชื่อได้เองทั้งสอง (parcel เพิ่ม add-on ได้ด้วย) ในหน้า ตั้งค่าผลลัพธ์ (`user_schema.json`) · ปุ่ม "คืนค่าเริ่มต้น" กลับชุดเดิมได้เสมอ — **อย่าตั้งชื่อ preset ของ cityplanning ว่า ANIS POWER**
 4. **ห้ามเปลี่ยน CRS** `zones.py` (EPSG 24047/24048 เท่านั้น)
 5. **`LandusePlan` / `PLLU`** ใน code คือชื่อ URL/service จริงของกรมที่ดิน — ห้ามเปลี่ยน
 

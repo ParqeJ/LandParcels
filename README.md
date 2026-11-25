@@ -6,13 +6,17 @@ Python tool ดึง **แปลงที่ดินโฉนด/น.ส.3ก*
 
 ## 📑 สารบัญ
 
-| คู่มือ | ใช้เมื่อ |
-|---|---|
-| **[docs/setup.md](docs/setup.md)** | ติดตั้งครั้งแรก, เตรียมบัญชี, โครงสร้างไฟล์, ไฟล์ secret, กฎทั่วไป |
-| **[docs/parcel.md](docs/parcel.md)** | ดึง **แปลงที่ดิน** โฉนด/น.ส.3ก ตามขอบเขตพื้นที่ (`fetch_parcels.py`) |
-| **[docs/cityplanning.md](docs/cityplanning.md)** | ดึง **ผังเมืองรวม** รายจังหวัด (`fetch_cityplanning.py`) |
+คู่มือทั้งหมดอยู่ใน `docs/` — เปิดอ่านบน GitHub/VS Code/Obsidian ได้ หรือเปิด **dashboard → เมนู 📖 คู่มือ** (`http://localhost:8765/#docs`) อ่านในหน้าเว็บพร้อมกดลิงก์ข้ามหน้าได้
 
-ไฟล์ใน `docs/` แต่ละไฟล์มีลิงก์ breadcrumb กลับมาที่สารบัญ (README.md) และลิงก์ข้ามไฟล์กัน — เปลี่ยนไปอ่านอีกไฟล์ได้ด้วยคลิกเดียว
+| # | คู่มือ | ใช้เมื่อ | ใน dashboard |
+|---|---|---|---|
+| 1 | **[docs/setup.md](docs/setup.md)** | ติดตั้งครั้งแรก, เตรียมบัญชี, โครงสร้างไฟล์, ไฟล์ secret, กฎทั่วไป | `#docs/setup` |
+| 2 | **[docs/dashboard.md](docs/dashboard.md)** | ใช้ผ่าน **หน้าเว็บ** — ล็อกอิน, ลากวาง/ลบไฟล์ขอบเขต, กดรัน, ดู log, ดาวน์โหลดผล (ไม่ต้องพิมพ์คำสั่ง) | `#docs/dashboard` |
+| 3 | **[docs/parcel.md](docs/parcel.md)** | ดึง **แปลงที่ดิน** โฉนด/น.ส.3ก ตามขอบเขตพื้นที่ (`fetch_parcels.py`) | `#docs/parcel` |
+| 4 | **[docs/cityplanning.md](docs/cityplanning.md)** | ดึง **ผังเมืองรวม** รายจังหวัด (`fetch_cityplanning.py`) | `#docs/cityplanning` |
+| 5 | **[docs/schema.md](docs/schema.md)** | เลือก **ฟิลด์เสริม + ตั้งชื่อฟิลด์** ของผลลัพธ์ (`user_schema.json`) | `#docs/schema` |
+
+ทุกไฟล์ใน `docs/` มีแถบ 📑 ด้านบนลิงก์กลับมาที่สารบัญนี้และข้ามไปไฟล์อื่นได้คลิกเดียว — เพิ่มคู่มือใหม่แค่วางไฟล์ `.md` ใน `docs/` เมนู 📖 คู่มือ ของ dashboard จะเห็นเอง
 
 ---
 
@@ -41,6 +45,15 @@ python fetch_parcels.py examples/sample_area.geojson --no-detail
 # 3) ลองดึงผังเมืองจังหวัดที่เปิดสาธารณะ (60 = นครสวรรค์)
 python fetch_cityplanning.py 60
 ```
+
+### หรือใช้ผ่านหน้าเว็บ (Dashboard)
+
+```powershell
+pip install fastapi uvicorn python-multipart
+python -m uvicorn dashboard.server:app --host 127.0.0.1 --port 8765   # แล้วเปิด http://localhost:8765
+```
+
+Windows ดับเบิลคลิก `open_dashboard.bat` ได้เลย — ในหน้าเว็บทำได้ครบ: **🔐 เข้าสู่ระบบด้วยบัญชี LandsMaps (DGA)** · ลากไฟล์ KMZ/SHP/zip เข้า `areas/` (ลบออกได้ — ย้ายไป `.deleted/` กู้คืนได้) · เลือกฟิลด์เสริม + ตั้งชื่อฟิลด์ ([docs/schema.md](docs/schema.md)) · กดรัน · ดู log สด · ดาวน์โหลดผลเป็น zip · อ่านคู่มือในเมนู 📖 · ปรับธีมสว่าง/มืด → ดู [docs/dashboard.md](docs/dashboard.md)
 
 รายละเอียดการกรอกบัญชี, token, โควตา, troubleshooting → ดู [docs/parcel.md](docs/parcel.md) และ [docs/cityplanning.md](docs/cityplanning.md)
 

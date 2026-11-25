@@ -91,6 +91,20 @@ def test_describe_missing_file_tells_what_to_do(tmp_path):
     assert "ยังไม่มีไฟล์นี้" in out and "get_token.py" in out
 
 
+def test_remove_drops_only_given_fields(tmp_path):
+    p = tmp_path / "Access_Key.txt"
+    ks.save(p, kind="openid", user="123", key="tok", **{"pass": "pw"})
+    ks.remove("pass", "key", path=p)
+    data = ks.load(p)
+    assert data["user"] == "123" and "pass" not in data and "key" not in data
+
+
+def test_remove_missing_field_does_not_touch_file(tmp_path):
+    p = tmp_path / "Access_Key.txt"
+    ks.remove("key", path=p)
+    assert not p.exists()
+
+
 def test_describe_shows_fields_without_leaking_password(tmp_path):
     p = tmp_path / "Access_Key.txt"
     ks.save(p, kind="openid", user="1234567890123", key="eyJ" + "x" * 500,

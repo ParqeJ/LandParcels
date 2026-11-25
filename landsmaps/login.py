@@ -103,7 +103,7 @@ def write_env(updates: dict[str, str], path: Path = ENV_FILE) -> Path:
     lines = path.read_text(encoding="utf-8-sig").splitlines() if path.exists() else []
     left = {k: quote_value(v) for k, v in updates.items()}
     for i, line in enumerate(lines):
-        key = line.split("=", 1)[0].strip() if "=" in line and not line.strip().startswith("#") else ""
+        key = env_key(line)
         if key in left:
             lines[i] = f"{key}={left.pop(key)}"
     if not lines:
@@ -111,6 +111,30 @@ def write_env(updates: dict[str, str], path: Path = ENV_FILE) -> Path:
     lines += [f"{k}={v}" for k, v in left.items()]
     keystore.write_secret(path, "\n".join(lines) + "\n")
     return path
+
+
+def env_key(line: str) -> str:
+    """ชื่อ key ของบรรทัดใน .env ("" = บรรทัดว่าง/คอมเมนต์/ไม่ใช่ KEY=value)"""
+    if "=" not in line or line.strip().startswith("#"):
+        return ""
+    return line.split("=", 1)[0].strip()
+
+
+def remove_env(keys: tuple[str, ...], path: Path = ENV_FILE) -> Path:
+    """ลบบรรทัดของ key ที่ระบุออกจาก .env (บรรทัดอื่นและคอมเมนต์คงเดิม) ไม่มีไฟล์ -> ไม่ทำอะไร"""
+    if not path.exists():
+        return path
+    lines = path.read_text(encoding="utf-8-sig").splitlines()
+    kept = [line for line in lines if env_key(line) not in keys]
+    if kept != lines:
+        keystore.write_secret(path, "\n".join(kept) + "\n")
+    return path
+
+
+def forget_credentials(token_path: Path = TOKEN_FILE, env_path: Path = ENV_FILE) -> None:
+    """ลืมบัญชีที่จำไว้ (รหัสผ่านใน Access_Key.txt + บัญชีใน .env) token ที่ได้มาแล้วยังใช้ได้จนหมดอายุ"""
+    keystore.remove("pass", path=token_path)
+    remove_env((ID_KEY, PASSWORD_KEY), env_path)
 
 
 def save_credentials(user: str, password: str, token: str) -> None:

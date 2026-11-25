@@ -45,6 +45,7 @@
   .field code{font-family:var(--mono);font-size:12px;background:color-mix(in srgb, var(--surface) 70%, var(--ink) 10%);padding:2px 6px;border-radius:3px;color:var(--ink)}
   .field.locked code{background:transparent;color:var(--locked-ink)}
   .field .desc{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .field input[type=text].bad{border-color:#c0392b !important;background:color-mix(in srgb, #c0392b 10%, var(--bg))}
   .field input[type=text]{width:100%;padding:5px 8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:4px;font:inherit;font-family:var(--mono);font-size:12px}
   .field input[type=text]:disabled{background:transparent;border-color:transparent;font-family:var(--mono)}
   .field .type{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase}
@@ -101,14 +102,17 @@
 
   <section id="sec-cityplanning" class="section">
     <div class="toolbar">
+      <button class="btn ghost" id="preset-city">↩︎ คืนค่าเริ่มต้น · 12 ฟิลด์ (merge ได้)</button>
       <button class="btn ghost" id="select-all-city">☑️ เลือกทั้งหมด</button>
       <button class="btn ghost" id="clear-all-city">☐ ล้าง</button>
       <button class="btn ghost" id="reset-names-city">↻ รีเซ็ตชื่อ (ใช้ label เดิม)</button>
       <span class="count" id="count-city"></span>
     </div>
-    <div class="warn" id="fixed-warn-city">
-      ⚠️ 12 ฟิลด์ล่างนี้เป็น <b>fixed_fields</b> ของ cityplanning merge pipeline — <b>ห้ามเปลี่ยนชื่อหรือลบ</b>
+    <div class="notice" id="fixed-warn-city">
+      ℹ️ ฟิลด์หลัก 12 ของผังเมือง <b>ติ๊กออก/เปลี่ยนชื่อได้</b> — ค่าเริ่มต้นคงครบ 12 ฟิลด์ ชื่อเดิม (merge ได้) · เพิ่มฟิลด์เสริมได้ด้านล่าง
     </div>
+    <div id="base-city"></div>
+    <h4 class="sch-sub" style="margin:16px 0 8px;font-size:14px">ฟิลด์เสริม</h4>
     <div id="groups-city"></div>
   </section>
 
@@ -125,6 +129,7 @@
 <script>
 const catalogs = { parcel: null, cityplanning: null };
 const state = { parcel: new Map(), cityplanning: new Map() };
+const cityBase = new Map();   // field -> {checked, name, _def} : ฟิลด์หลัก 12 ของผังเมือง (ติ๊กออก/เปลี่ยนชื่อได้)
 
 document.querySelectorAll('nav.tabs button').forEach(b=>{
   b.addEventListener('click',()=>{
@@ -172,8 +177,15 @@ function onCatalogsReady(){
   const s = document.getElementById('status');
   s.textContent='พร้อม — แก้ชื่อ/เลือกฟิลด์แล้วกด Save';
   s.classList.remove('err');
-  buildState('parcel'); buildState('cityplanning');
+  buildState('parcel'); buildState('cityplanning'); buildCityBase();
   renderSection('parcel'); renderSection('cityplanning');
+}
+
+function buildCityBase(){
+  cityBase.clear();
+  for(const d of (catalogs.cityplanning.base_fields||[])){
+    cityBase.set(d.field, { checked:true, name:d.field, _def:d });   // preset: ติ๊กครบ ชื่อเดิม
+  }
 }
 
 function buildState(key){
@@ -231,9 +243,101 @@ function renderSection(key){
   host.querySelectorAll('input[type=text]').forEach(inp=>{
     inp.addEventListener('input',()=>{
       state[key].get(inp.dataset.src).name = inp.value.trim();
+      markBadNames();
     });
   });
+  if(key==='cityplanning') renderCityBase();
   updateCount(key);
+  markBadNames();
+}
+
+function renderCityBase(){
+  const host = document.getElementById('base-city');
+  const picked = [...cityBase.values()].filter(s=>s.checked).length;
+  let html = `<div class="group"><h3><span>ฟิลด์หลักผังเมือง (ติ๊กออก/เปลี่ยนชื่อได้)</span><span class="g-count">${picked}/${cityBase.size}</span></h3>`;
+  html += `<div class="field-head"><span>เลือก</span><span>Source (API)</span><span>คำอธิบาย</span><span>ชื่อฟิลด์ output</span><span class="type">Type</span></div>`;
+  for(const [field, st] of cityBase){
+    const d = st._def, descTxt = (d.desc||'') + (d.example?` (เช่น ${d.example})`:'');
+    html += `<div class="field">
+      <input type="checkbox" ${st.checked?'checked':''} data-cb="${escapeAttr(field)}">
+      <code>${escapeHtml(d.source||field)}</code>
+      <span class="desc" title="${escapeAttr(descTxt)}">${escapeHtml(descTxt||'—')}</span>
+      <input type="text" value="${escapeAttr(st.name)}" data-cb="${escapeAttr(field)}" maxlength="10">
+      <span class="type">${escapeHtml(d.type||'')}</span>
+    </div>`;
+  }
+  html += `</div>`;
+  host.innerHTML = html;
+  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{
+    cityBase.get(cb.dataset.cb).checked = cb.checked; renderCityBase(); updateCount('cityplanning'); markBadNames();
+  }));
+  host.querySelectorAll('input[type=text]').forEach(inp=>inp.addEventListener('input',()=>{
+    cityBase.get(inp.dataset.cb).name = inp.value.trim(); markBadNames();
+  }));
+}
+
+// ชื่อฟิลด์เสริมที่ใช้ไม่ได้: ว่าง / เกิน 10 / ซ้ำกันเอง / ชนฟิลด์มาตรฐาน (DBF ไม่แยกตัวพิมพ์ -> เทียบตัวเล็ก)
+// กฎเดียวกับ dashboard (server.py: schema_problems)
+function nameMsg(name, reserved, seen){
+  const low = (name||'').toLowerCase();
+  if(!name) return 'ยังไม่ได้ตั้งชื่อ';
+  if(name.length > 10) return 'เกิน 10 ตัวอักษร';
+  if(reserved.has(low)) return `ซ้ำกับฟิลด์มาตรฐาน ${reserved.get(low)}`;
+  if(seen.has(low)) return `ชื่อ "${name}" ซ้ำกับ ${seen.get(low)}`;
+  return '';
+}
+function nameProblems(){
+  const out = [];
+  // parcel (เดิม): extras ห้ามชน fixed_fields / ซ้ำกันเอง
+  if(catalogs.parcel){
+    const fixed = new Map((catalogs.parcel.fixed_fields||[]).map(n=>[n.toLowerCase(), n]));
+    const seen = new Map();
+    for(const [src,v] of state.parcel){
+      if(!v.checked || v.fixed) continue;
+      const msg = nameMsg(v.name, fixed, seen);
+      if(msg) out.push({ key:'parcel', id:'x|'+src, msg });
+      else seen.set((v.name||'').toLowerCase(), src);
+    }
+  }
+  // cityplanning: base (ติ๊ก) + extras รวมกัน ห้ามซ้ำกันเอง (base เปลี่ยนชื่อได้แล้ว ไม่ reserve)
+  if(catalogs.cityplanning){
+    const empty = new Map(), seen = new Map();
+    for(const [field,st] of cityBase){
+      if(!st.checked) continue;
+      const msg = nameMsg(st.name, empty, seen);
+      if(msg) out.push({ key:'cityplanning', id:'cb|'+field, msg });
+      else seen.set((st.name||'').toLowerCase(), 'ฟิลด์หลัก '+field);
+    }
+    for(const [src,v] of state.cityplanning){
+      if(!v.checked || v.fixed) continue;
+      const msg = nameMsg(v.name, empty, seen);
+      if(msg) out.push({ key:'cityplanning', id:'x|'+src, msg });
+      else seen.set((v.name||'').toLowerCase(), src);
+    }
+  }
+  return out;
+}
+function markBadNames(){
+  const bad = new Map(nameProblems().map(p=>[p.key+'|'+p.id, p.msg]));
+  const paint = (hostId, key, attr, prefix)=>{
+    document.querySelectorAll(`#${hostId} input[type=text]`).forEach(inp=>{
+      const msg = bad.get(key+'|'+prefix+'|'+inp.dataset[attr]);
+      inp.classList.toggle('bad', !!msg);
+      inp.title = msg || '';
+    });
+  };
+  paint('groups-parcel','parcel','src','x');
+  paint('base-city','cityplanning','cb','cb');
+  paint('groups-city','cityplanning','src','x');
+}
+/** true = บันทึกได้ · false = มีชื่อที่ใช้ไม่ได้ (แจ้งใน status แล้ว) */
+function checkNamesBeforeSave(){
+  const probs = nameProblems();
+  markBadNames();
+  if(!probs.length) return true;
+  document.getElementById('status').textContent =
+    `✗ ยังไม่บันทึก — แก้ชื่อที่ขึ้นกรอบแดงก่อน: ` + probs.map(p=>`${p.key} · ${p.id.split('|').slice(1).join('|')}: ${p.msg}`).join(' / ');
+  return false;
 }
 
 function refreshGroupCounts(key){
@@ -249,6 +353,7 @@ function updateCount(key){
   const el = document.getElementById(key==='parcel'?'count-parcel':'count-city');
   let total=0,picked=0;
   for(const [,v] of state[key]){ total++; if(v.checked) picked++; }
+  if(key==='cityplanning'){ for(const [,v] of cityBase){ total++; if(v.checked) picked++; } }
   el.textContent = `(เลือก ${picked}/${total})`;
 }
 
@@ -266,6 +371,10 @@ function buildUserSchema(){
     }
     out[key] = { extra_fields: extras };
   }
+  // cityplanning: ฟิลด์หลัก 12 ที่ติ๊กไว้ (ติ๊กออก/เปลี่ยนชื่อได้) — ไม่ติ๊ก = ไม่เอาฟิลด์นั้น
+  out.cityplanning.base_fields = [...cityBase]
+    .filter(([, v]) => v.checked && v.name)
+    .map(([field, v]) => ({ field, name: v.name }));
   return out;
 }
 
@@ -275,9 +384,11 @@ function downloadJSON(obj, fname){
   a.href = URL.createObjectURL(blob); a.download = fname; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
-document.getElementById('save-all').addEventListener('click',()=>downloadJSON(buildUserSchema(),'user_schema.json'));
-document.getElementById('save-preview').addEventListener('click',()=>downloadJSON(buildUserSchema(),'user_schema.json'));
+const saveIfValid = ()=>{ if(checkNamesBeforeSave()) downloadJSON(buildUserSchema(),'user_schema.json'); };
+document.getElementById('save-all').addEventListener('click', saveIfValid);
+document.getElementById('save-preview').addEventListener('click', saveIfValid);
 document.getElementById('copy-json').addEventListener('click', async ()=>{
+  if(!checkNamesBeforeSave()) return;
   await navigator.clipboard.writeText(JSON.stringify(buildUserSchema(),null,2));
   const s=document.getElementById('status'); const old=s.textContent;
   s.textContent='คัดลอก JSON แล้ว ✓'; setTimeout(()=>s.textContent=old, 2000);
@@ -304,17 +415,31 @@ document.getElementById('f_user').addEventListener('change', async e=>{
       alert(`${key}: พบ source ${unknown.length} อันไม่มีใน catalog ปัจจุบัน:\n`+unknown.join('\n'));
     }
   }
+  // cityplanning base: มี base_fields = ตามที่บันทึก, ไม่มี (รูปแบบเดิม) = preset ครบ 12 ชื่อเดิม
+  const cityBF = (data.cityplanning && Array.isArray(data.cityplanning.base_fields)) ? data.cityplanning.base_fields : null;
+  if(cityBF){
+    const saved = new Map(cityBF.map(b=>[b.field, b.name]));
+    for(const [field,st] of cityBase){ st.checked = saved.has(field); st.name = saved.get(field) ?? field; }
+  }else{
+    for(const [field,st] of cityBase){ st.checked = true; st.name = field; }
+  }
   renderSection('parcel'); renderSection('cityplanning');
   const s=document.getElementById('status'); s.textContent='โหลด user_schema.json แล้ว ✓';
 });
 
 function selectAll(key, v){
   for(const [,st] of state[key]){ if(!st.fixed) st.checked=v; }
+  if(key==='cityplanning'){ for(const [,st] of cityBase){ st.checked=v; } }
   renderSection(key);
 }
 function resetNames(key){
   for(const [,st] of state[key]){ if(!st.fixed) st.name = st._field.label; }
+  if(key==='cityplanning'){ for(const [field,st] of cityBase){ st.name = field; } }
   renderSection(key);
+}
+function presetCity(){
+  for(const [field,st] of cityBase){ st.checked = true; st.name = field; }   // ติ๊กครบ 12 ชื่อเดิม
+  renderSection('cityplanning');
 }
 document.getElementById('select-all-parcel').addEventListener('click',()=>selectAll('parcel',true));
 document.getElementById('clear-all-parcel').addEventListener('click',()=>selectAll('parcel',false));
@@ -322,6 +447,7 @@ document.getElementById('reset-names-parcel').addEventListener('click',()=>reset
 document.getElementById('select-all-city').addEventListener('click',()=>selectAll('cityplanning',true));
 document.getElementById('clear-all-city').addEventListener('click',()=>selectAll('cityplanning',false));
 document.getElementById('reset-names-city').addEventListener('click',()=>resetNames('cityplanning'));
+document.getElementById('preset-city').addEventListener('click', presetCity);
 
 function renderPreview(){
   document.getElementById('preview').textContent = JSON.stringify(buildUserSchema(), null, 2);

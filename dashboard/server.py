@@ -1,6 +1,6 @@
 """LandParcels Dashboard - FastAPI backend
 
-หน้าเดียวจบ: input + output + schema + cityplanning + run + monitor + map
+หน้าเดียวจบ: บัญชี LandsMaps + input (อัปโหลด/ลบ) + schema + run + monitor + map + output (ดาวน์โหลด) + คู่มือ
 รัน: python -m uvicorn dashboard.server:app --host 127.0.0.1 --port 8765
 """
 from __future__ import annotations
@@ -16,11 +16,15 @@ import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, AsyncIterator
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+from dashboard import auth, city_schema, docs, files, parcel_schema, status
+from landsmaps.area import is_area_file, read_polygons
 
 logger = logging.getLogger("dashboard")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -32,6 +36,8 @@ OUTPUT_DIR = ROOT / "output"
 DASHBOARD_DIR = Path(__file__).resolve().parent
 
 SHP_NAME_MAX = 10
+LOCAL_HOSTNAMES = {"127.0.0.1", "localhost", "::1"}
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
 
 @dataclass
@@ -88,7 +94,32 @@ class UserSchemaIn(BaseModel):
     cityplanning: dict[str, Any] | None = None
 
 
-app = FastAPI(title="LandParcels Dashboard", version="0.1")
+app = FastAPI(title="LandParcels Dashboard", version="0.2")
+app.include_router(auth.router)
+app.include_router(files.router)
+app.include_router(docs.router)
+app.include_router(status.router)
+app.include_router(parcel_schema.router)
+
+
+def _hostname(netloc: str) -> str | None:
+    try:
+        return urlsplit(f"//{netloc}").hostname
+    except ValueError:
+        return None
+
+
+@app.middleware("http")
+async def local_only(request: Request, call_next: Any) -> Response:
+    """server รับรหัสผ่านและเขียนไฟล์ได้ -> กันเว็บอื่นใน browser เดียวกันยิงเข้ามา
+    (Host ต้องเป็น localhost = กัน DNS rebinding, Origin ต้องตรงกัน = กัน CSRF)"""
+    host = request.headers.get("host", "")
+    if _hostname(host) not in LOCAL_HOSTNAMES:
+        return JSONResponse({"detail": "dashboard เปิดได้จาก localhost เท่านั้น"}, status_code=403)
+    origin = request.headers.get("origin")
+    if request.method not in SAFE_METHODS and origin is not None and urlsplit(origin).netloc != host:
+        return JSONResponse({"detail": "ปฏิเสธคำขอจากเว็บอื่น (cross-origin)"}, status_code=403)
+    return await call_next(request)
 
 
 @app.get("/")
@@ -122,6 +153,10 @@ def save_user_schema(body: UserSchemaIn) -> JSONResponse:
         "parcel": body.parcel or {"extra_fields": []},
         "cityplanning": body.cityplanning or {"extra_fields": []},
     }
+    if parcel_schema.has_layout(data["parcel"]):
+        data["parcel"] = parcel_schema.normalize(data["parcel"], _catalog("parcel"))
+    if city_schema.has_base(data["cityplanning"]):
+        data["cityplanning"] = city_schema.normalize(data["cityplanning"], _catalog("cityplanning"))
     _validate_schema(data)
     SCHEMA_DIR.mkdir(exist_ok=True)
     (SCHEMA_DIR / "user_schema.json").write_text(
@@ -130,38 +165,110 @@ def save_user_schema(body: UserSchemaIn) -> JSONResponse:
     return JSONResponse({"ok": True, "path": str(SCHEMA_DIR / "user_schema.json")})
 
 
+def _fixed_fields(section: str) -> list[str]:
+    path = SCHEMA_DIR / f"catalog_{section}.json"
+    if not path.exists():
+        return []
+    return list(json.loads(path.read_text(encoding="utf-8")).get("fixed_fields") or [])
+
+
+def schema_problems(section: str, extras: list[Any], fixed: list[str]) -> list[str]:
+    """ปัญหาของชื่อฟิลด์เสริม — DBF ไม่แยกตัวพิมพ์เล็ก/ใหญ่ ('rai' = 'Rai') จึงเทียบแบบ casefold"""
+    fixed_by_key = {n.casefold(): n for n in fixed}
+    seen: dict[str, str] = {}
+    problems: list[str] = []
+    for f in extras:
+        if not isinstance(f, dict) or "source" not in f or "name" not in f:
+            problems.append(f"{section}: extra_fields ต้องมี source และ name")
+            continue
+        src, name = str(f["source"]), str(f["name"]).strip()
+        key = name.casefold()
+        if not name:
+            problems.append(f"{section}: {src} ยังไม่ได้ตั้งชื่อ")
+        elif len(name) > SHP_NAME_MAX:
+            problems.append(f"{section}: ชื่อ '{name}' เกิน {SHP_NAME_MAX} ตัวอักษร")
+        elif key in fixed_by_key:
+            problems.append(f"{section}: ชื่อ '{name}' ({src}) ซ้ำกับฟิลด์มาตรฐาน {fixed_by_key[key]}")
+        elif key in seen:
+            problems.append(f"{section}: ชื่อ '{name}' ซ้ำกัน ({seen[key]} กับ {src})")
+        else:
+            seen[key] = src
+    return problems
+
+
+def _catalog(section: str) -> dict[str, Any]:
+    path = SCHEMA_DIR / f"catalog_{section}.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
 def _validate_schema(data: dict[str, Any]) -> None:
+    """parcel/cityplanning แบบใหม่ (มี base_fields): ชื่อที่ห้ามชน = ฟิลด์หลัก/add-on ที่เลือก
+    แบบเดิม: ชื่อที่ห้ามชน = fixed_fields ใน catalog"""
+    problems: list[str] = []
     for key in ("parcel", "cityplanning"):
-        for f in (data.get(key, {}) or {}).get("extra_fields", []) or []:
-            if not isinstance(f, dict) or "source" not in f or "name" not in f:
-                raise HTTPException(400, f"{key}: extra_fields ต้องมี source และ name")
-            if len(str(f["name"])) > SHP_NAME_MAX:
-                raise HTTPException(400, f"{key}: ชื่อ '{f['name']}' เกิน {SHP_NAME_MAX} ตัวอักษร")
-
-
-AREA_SUFFIXES = {".kmz", ".kml", ".geojson", ".json", ".shp"}
+        cfg = data.get(key) or {}
+        reserved = _fixed_fields(key)
+        if key == "parcel" and parcel_schema.has_layout(cfg):
+            reserved, core = parcel_schema.core_problems(cfg, _catalog("parcel"))
+            problems += core
+        elif key == "cityplanning" and city_schema.has_base(cfg):
+            reserved, core = city_schema.core_problems(cfg, _catalog("cityplanning"))
+            problems += core
+        problems += schema_problems(key, cfg.get("extra_fields") or [], reserved)
+    if problems:
+        raise HTTPException(400, {"message": f"ตั้งชื่อฟิลด์ไม่ถูกต้อง {len(problems)} จุด",
+                                  "problems": problems})
 
 
 @app.get("/api/areas")
 def list_areas() -> JSONResponse:
     if not AREAS_DIR.exists():
-        return JSONResponse({"items": [], "note": "ไม่พบ areas/ - สร้างโฟลเดอร์แล้ววางไฟล์"})
+        return JSONResponse({"items": [], "note": "ไม่พบ areas/ - อัปโหลดไฟล์จากหน้า Input ได้เลย"})
     items = []
     for p in sorted(AREAS_DIR.iterdir()):
-        if p.name.startswith("."):
-            continue
-        is_gdb = p.is_dir() and p.suffix.lower() == ".gdb"
-        if not (p.is_file() or is_gdb):
-            continue
-        if p.is_file() and p.suffix.lower() not in AREA_SUFFIXES:
+        if not is_area_file(p):
             continue
         items.append({
             "name": p.name,
-            "kind": "gdb" if is_gdb else p.suffix.lower().lstrip("."),
+            "kind": "gdb" if p.is_dir() else p.suffix.lower().lstrip("."),
             "size": _safe_size(p),
             "mtime": int(p.stat().st_mtime),
         })
     return JSONResponse({"items": items})
+
+
+class DeleteAreasIn(BaseModel):
+    names: list[str]
+
+
+ACTIVE_STATUSES = {"pending", "running"}
+
+
+def _areas_in_use(names: list[str]) -> list[str]:
+    """areas ที่ job ที่ยังรันอยู่กำลังใช้ (parcel ที่ไม่เลือก area = ใช้ทุกไฟล์ใน areas/)"""
+    used: set[str] = set()
+    for job in JOBS.values():
+        if job.status not in ACTIVE_STATUSES:
+            continue
+        if job.kind == "parcel":
+            used.update(job.args.get("areas") or names)
+        elif job.args.get("area"):
+            used.add(job.args["area"])
+    return sorted(set(names) & used)
+
+
+@app.post("/api/areas/delete")
+def delete_areas(body: DeleteAreasIn) -> JSONResponse:
+    """ย้ายไป areas/.deleted/<เวลา>/ (กู้คืนได้) — fetch_parcels/dashboard ไม่อ่านโฟลเดอร์ที่ขึ้นต้นด้วยจุด"""
+    if not body.names:
+        raise HTTPException(400, "ยังไม่ได้เลือกไฟล์ที่จะลบ")
+    busy = _areas_in_use(body.names)
+    if busy:
+        raise HTTPException(409, {"message": "มี job ที่ยังรันอยู่ใช้ไฟล์นี้ — รอให้จบหรือกดหยุดก่อน",
+                                  "busy": busy})
+    trash = files.trash_areas(body.names)
+    logger.info("moved %d area(s) to areas/%s", len(body.names), trash)
+    return JSONResponse({"deleted": list(dict.fromkeys(body.names)), "trash": trash})
 
 
 def _safe_size(p: Path) -> int:
@@ -175,24 +282,17 @@ def _safe_size(p: Path) -> int:
 
 @app.get("/api/areas/{name}/geojson")
 def area_geojson(name: str) -> JSONResponse:
+    """ใช้ตัวอ่านเดียวกับ fetch_parcels.py (รองรับ KMZ / หลาย layer / ไม่มี CRS) -> EPSG:4326"""
+    from shapely.geometry import mapping
+
     path = _safe_area_path(name)
     try:
-        import geopandas as gpd
-    except ImportError:
-        raise HTTPException(500, "ต้อง pip install geopandas")
-    try:
-        gdf = gpd.read_file(path)
-    except Exception as e:
-        raise HTTPException(500, f"อ่านไฟล์ไม่สำเร็จ: {e}")
-    try:
-        if gdf.crs is not None and gdf.crs.to_epsg() != 4326:
-            gdf = gdf.to_crs(4326)
-    except Exception:
-        pass
-    cols = [c for c in gdf.columns if c != gdf.geometry.name]
-    if cols:
-        gdf = gdf[[gdf.geometry.name]]
-    return JSONResponse(json.loads(gdf.to_json()))
+        geom = read_polygons(path)
+    except Exception as e:  # noqa: BLE001 - แสดงสาเหตุจาก GDAL ให้ผู้ใช้เห็น
+        raise HTTPException(422, f"อ่านขอบเขตไม่สำเร็จ: {e}") from None
+    return JSONResponse({"type": "FeatureCollection", "features": [
+        {"type": "Feature", "properties": {"name": name}, "geometry": mapping(geom)},
+    ]})
 
 
 def _safe_area_path(name: str) -> Path:
@@ -235,6 +335,7 @@ def list_output() -> JSONResponse:
             continue
         items.append({
             "path": rel,
+            "dir": p.parent.relative_to(OUTPUT_DIR).as_posix() if p.parent != OUTPUT_DIR else "",
             "size": p.stat().st_size,
             "mtime": int(p.stat().st_mtime),
         })
@@ -257,10 +358,17 @@ async def run_job(req: RunRequest) -> JSONResponse:
     else:
         raise HTTPException(400, "kind ต้องเป็น parcel หรือ cityplanning")
 
+    if args.get("token"):
+        args["token"] = "***"
     job = Job(id=uuid.uuid4().hex[:8], kind=req.kind, cmd=cmd, args=args)
     JOBS[job.id] = job
     asyncio.create_task(_execute_job(job))
-    return JSONResponse({"job_id": job.id, "cmd": cmd})
+    return JSONResponse({"job_id": job.id, "cmd": _display_cmd(cmd)})
+
+
+def _display_cmd(cmd: list[str]) -> list[str]:
+    """cmd สำหรับแสดงบนหน้าเว็บ — ซ่อนค่าหลัง --token"""
+    return [("***" if i > 0 and cmd[i - 1] == "--token" else c) for i, c in enumerate(cmd)]
 
 
 def _build_parcel_cmd(p: ParcelArgs) -> list[str]:
@@ -374,7 +482,7 @@ def get_job(job_id: str) -> JSONResponse:
     if not j:
         raise HTTPException(404, "ไม่พบ job")
     return JSONResponse({
-        "id": j.id, "kind": j.kind, "status": j.status, "cmd": j.cmd,
+        "id": j.id, "kind": j.kind, "status": j.status, "cmd": _display_cmd(j.cmd),
         "args": j.args, "started_at": j.started_at, "ended_at": j.ended_at,
         "returncode": j.returncode, "progress": j.progress,
         "lines": j.lines[-200:],

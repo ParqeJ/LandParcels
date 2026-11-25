@@ -1,6 +1,6 @@
 # ผังเมือง — `fetch_cityplanning.py` คู่มือเต็ม
 
-> 📑 สารบัญ: [← README](../README.md) · [setup](setup.md) · [parcel](parcel.md)
+> 📑 สารบัญ: [← README](../README.md) · [setup](setup.md) · [dashboard](dashboard.md) · [parcel](parcel.md) · [schema](schema.md) · 🖥 อ่านใน dashboard: `http://localhost:8765/#docs/cityplanning`
 
 ดึง **ผังเมืองรวม / การใช้ประโยชน์ที่ดิน** รายจังหวัดจาก service `LandusePlan` ของ
 [LandsMaps กรมที่ดิน](https://landsmaps.dol.go.th/) ออกมาเป็น **Shapefile + GeoPackage**

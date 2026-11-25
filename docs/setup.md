@@ -1,6 +1,6 @@
 # Setup — โครงสร้าง, Secrets, Dependencies
 
-> 📑 สารบัญ: [← README](../README.md) · [parcel](parcel.md) · [cityplanning](cityplanning.md)
+> 📑 สารบัญ: [← README](../README.md) · [dashboard](dashboard.md) · [parcel](parcel.md) · [cityplanning](cityplanning.md) · [schema](schema.md) · 🖥 อ่านใน dashboard: `http://localhost:8765/#docs/setup`
 > คู่มือการติดตั้ง + กฎทั่วไปของ LandParcels (ใช้กับทั้ง parcel และ cityplanning)
 
 ---
@@ -17,6 +17,15 @@ LandParcels/
 ├── search_parcel.py              ค้นแปลงจากเลขโฉนด
 ├── Program_fetch_parcel.cmd      (Windows) double-click รันแปลงที่ดิน
 ├── Program_fetch_cityplanning.cmd (Windows) double-click รันผังเมือง
+├── open_dashboard.bat            (Windows) double-click เปิด Dashboard
+│
+├── dashboard/                    ◄── Web UI local — ดู [docs/dashboard.md](dashboard.md)
+│   ├── server.py                 FastAPI: run/monitor/schema + กันเว็บอื่นยิงเข้ามา
+│   ├── auth.py                   บัญชี LandsMaps (ใช้ landsmaps.login ตัวเดียวกับ get_token.py)
+│   ├── files.py                  อัปโหลด/ลบ areas/ (ลบ = ย้ายไป .deleted/) · ดาวน์โหลด output/ เป็น zip
+│   ├── index.html                หน้าเว็บ (markup)
+│   └── static/                   app.css (theme สว่าง/มืด) · app.js · account.js
+├── schema/                       catalog ฟิลด์ + user_schema.json (ตั้งชื่อฟิลด์เสริม) — ดู [docs/schema.md](schema.md)
 │
 ├── .env                          (gitignore) บัญชี DGA
 ├── Access_Key.txt                (gitignore) token JSON
@@ -87,7 +96,7 @@ LandParcels/
 
 - **`config.py`** — ค่าตั้งต้น ถ้าเปลี่ยน delay/URL ให้ยืนยันกับผู้ใช้ก่อน (อาจโดน rate limit)
 - **`api.py`** — มี logic cache + token refresh **อย่าแตะถ้าไม่จำเป็น**
-- **`export.py` (parcel)** — schema 14 ฟิลด์ **ห้ามเพิ่ม/ลบฟิลด์** โดยไม่ยืนยัน (จะทำให้ merge กับโปรเจกต์ CBD/BNN พัง)
+- **`export.py` (parcel)** — **ค่าเริ่มต้นของ preset ANIS POWER ต้องคง 14 ฟิลด์** (merge กับ CBD/BNN) — ผู้ใช้ปรับเองได้ในหน้า ตั้งค่าผลลัพธ์
 - **`cityplanning/export.py`** — schema 12 ฟิลด์ของผังเมือง แยกจาก parcel **ห้ามปน**
 - **`zones.py`** — EPSG 24047/24048 **ห้ามเปลี่ยน**
 
@@ -100,3 +109,10 @@ LandParcels/
 ### 7. Dependencies
 
 - ถ้าจะเพิ่ม package ให้ update `requirements.txt` ด้วย และยืนยันว่า package รองรับ Windows + conda-forge
+- Dashboard ใช้เพิ่ม `fastapi`, `uvicorn`, `python-multipart` (และ `httpx` สำหรับ test) — อยู่ในส่วน "ไม่บังคับ" ของ `requirements.txt`; `open_dashboard.bat` ติดตั้งให้เองถ้ายังไม่มี
+
+### 8. Dashboard
+
+- Claude **ห้ามกด Start / เข้าสู่ระบบ / อัปโหลดลง `areas/` จริงแทนผู้ใช้** — ใช้ quota/บัญชี/ข้อมูลของผู้ใช้ (กฎเดียวกับข้อ 1)
+- server ผูกกับ `127.0.0.1` เท่านั้น และ middleware ปฏิเสธคำขอที่ Host ไม่ใช่ localhost หรือ Origin มาจากเว็บอื่น — **อย่าเปลี่ยนเป็น `--host 0.0.0.0`** (จะเปิดให้คนในเครือข่ายเดียวกันสั่งล็อกอิน/รันได้)
+- API ห้ามส่งรหัสผ่านหรือ token เต็มกลับหน้าเว็บ — `auth.py` คืนแค่ชื่อบัญชีแบบ mask + วันหมดอายุ

@@ -5,6 +5,20 @@
     "PL_USE", "PL_USE_TH", "ZONE_HEX", "FAR_MAX", "BCR_MAX", "DENS_H", "DENS_L",
     "PLAN_NAME", "YEAR", "PROVINCE", "AREA_RAI", "SRC_LAYER"
   ],
+  "base_fields": [
+    {"field": "PL_USE", "source": "props.PL_USE", "type": "int", "desc": "รหัสการใช้ประโยชน์ที่ดิน", "example": "1110"},
+    {"field": "PL_USE_TH", "source": "virtual.pl_use_th", "type": "str", "desc": "ข้อความไทยจาก legend", "example": "ที่อยู่อาศัยหนาแน่นน้อย"},
+    {"field": "ZONE_HEX", "source": "virtual.zone_hex", "type": "str", "desc": "สี hex จาก legend", "example": "#ffff00"},
+    {"field": "FAR_MAX", "source": "props.PL_FAR_MAX", "type": "float", "desc": "FAR สูงสุด", "example": "5"},
+    {"field": "BCR_MAX", "source": "props.PL_BCR_MAX", "type": "float", "desc": "BCR สูงสุด", "example": "0.8"},
+    {"field": "DENS_H", "source": "props.PL_DENS_H", "type": "float", "desc": "ความหนาแน่นสูง"},
+    {"field": "DENS_L", "source": "props.PL_DENS_L", "type": "float", "desc": "ความหนาแน่นต่ำ"},
+    {"field": "PLAN_NAME", "source": "props.NAME", "type": "str", "desc": "ชื่อผังเมือง"},
+    {"field": "YEAR", "source": "props.YEAR", "type": "str", "desc": "ปี พ.ศ.", "example": "2560"},
+    {"field": "PROVINCE", "source": "virtual.province", "type": "str", "desc": "จังหวัด", "example": "นครสวรรค์"},
+    {"field": "AREA_RAI", "source": "virtual.area_rai", "type": "float", "desc": "พื้นที่ (ไร่)"},
+    {"field": "SRC_LAYER", "source": "virtual.src_layer", "type": "str", "desc": "ชั้นข้อมูลต้นทาง"}
+  ],
   "groups": [
     {
       "name": "รหัสผังเมือง",

@@ -15,14 +15,12 @@ from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
 
+from .. import user_schema
 from ..zones import Zone
 from . import legend
 
-# ชื่อ field ของ Shapefile ยาวได้ไม่เกิน 10 ตัวอักษร
-FIELDS = [
-    "PL_USE", "PL_USE_TH", "ZONE_HEX", "FAR_MAX", "BCR_MAX", "DENS_H", "DENS_L",
-    "PLAN_NAME", "YEAR", "PROVINCE", "AREA_RAI", "SRC_LAYER",
-]
+# ชื่อ field ของ Shapefile ยาวได้ไม่เกิน 10 ตัวอักษร (source of truth: user_schema.CITY_BASE)
+FIELDS = list(user_schema.CITY_BASE_FIELDS)
 RAI_PER_M2 = 1 / 1600       # 1 ไร่ = 1600 ตร.ม.
 
 
@@ -69,8 +67,31 @@ def _row(props: dict, native_geom: BaseGeometry, province_name: str, layer_name:
     }
 
 
-def build(features: list[dict], zone: Zone, province_name: str, layer_name: str) -> gpd.GeoDataFrame:
-    """feature (lon/lat) -> GeoDataFrame ใน EPSG ของ zone (เมตร) พร้อม attribute ผังเมือง"""
+def _extra_values(props: dict, native_geom: BaseGeometry, extras) -> dict:
+    """ค่าของฟิลด์เสริม (ต่อท้าย 12 ฟิลด์ล็อก) ตาม user_schema — ดู landsmaps/user_schema"""
+    code = props.get("PL_USE")
+    code_str = str(code).strip() if code not in (None, "") else None
+    label, color = legend.label_for(code_str), legend.color_for(code_str)
+    return {c.name: user_schema.cast(
+        user_schema.resolve_city(c.source, props, native_geom.area, label, color), c.type)
+        for c in extras}
+
+
+def build(features: list[dict], zone: Zone, province_name: str, layer_name: str,
+          *, layout=None, extras=None) -> gpd.GeoDataFrame:
+    """feature (lon/lat) -> GeoDataFrame ใน EPSG ของ zone (เมตร) พร้อม attribute ผังเมือง
+
+    layout = CityLayout (base ที่ติ๊ก/เปลี่ยนชื่อ + extras) — ถ้าไม่ส่งทั้ง layout และ extras
+             จะโหลดจาก schema/user_schema.json (ไม่มีไฟล์ = preset 12 ฟิลด์เดิม)
+    extras = (ทางเดิม) ส่ง extras Columns ตรง ๆ โดย base = 12 ฟิลด์เดิม — ใช้โดย test/โค้ดเดิม"""
+    if layout is None and extras is None:
+        layout = user_schema.load_city_layout()
+    if layout is not None:
+        base_cols, extra_cols = layout.base, layout.extras
+    else:
+        base_cols, extra_cols = user_schema._default_city_base(), tuple(extras or ())
+    columns = [c.name for c in base_cols] + [c.name for c in extra_cols]
+
     def project(geom: BaseGeometry) -> BaseGeometry:
         return transform(lambda x, y, z=None: zone.transformer.transform(x, y), geom)
 
@@ -80,12 +101,20 @@ def build(features: list[dict], zone: Zone, province_name: str, layer_name: str)
         if g is None:
             continue
         native = project(g)
-        rows.append(_row(feat.get("properties") or {}, native, province_name, layer_name))
+        props = feat.get("properties") or {}
+        full = _row(props, native, province_name, layer_name)   # 12 ฟิลด์เดิม คีย์ = FIELDS
+        row = {c.name: full.get(c.source) for c in base_cols}    # เลือก/เปลี่ยนชื่อตาม layout
+        if extra_cols:
+            row.update(_extra_values(props, native, extra_cols))
+        rows.append(row)
         geoms.append(native)
 
-    gdf = gpd.GeoDataFrame(pd.DataFrame(rows, columns=FIELDS), geometry=geoms,
+    dtypes = {c.name: "Int64" for c in base_cols if c.type == "int"}
+    dtypes.update({c.name: ("Int64" if c.type == "int" else "float64")
+                   for c in extra_cols if c.type in ("int", "float")})
+    gdf = gpd.GeoDataFrame(pd.DataFrame(rows, columns=columns), geometry=geoms,
                            crs=CRS.from_epsg(zone.epsg))
-    return gdf.astype({"PL_USE": "Int64"})[FIELDS + ["geometry"]]
+    return gdf.astype(dtypes)[columns + ["geometry"]]
 
 
 def save(gdf: gpd.GeoDataFrame, stem: Path, *, formats: tuple[str, ...] = ("shp", "gpkg")) -> list[Path]:

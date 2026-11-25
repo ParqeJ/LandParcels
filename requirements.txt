@@ -5,5 +5,11 @@ pyproj>=3.6
 pandas>=2.0
 requests>=2.31
 
+# สำหรับ Dashboard (ไม่บังคับ — open_dashboard.bat ติดตั้งให้เอง)
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+
 # สำหรับรันชุดทดสอบ (ไม่จำเป็นต่อการใช้งาน)
 pytest>=7.4
+httpx>=0.27

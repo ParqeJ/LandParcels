@@ -12,10 +12,10 @@ echo กด Ctrl+C เพื่อปิด server
 echo.
 
 rem ตรวจ dependencies (ติดตั้งครั้งแรกถ้ายังไม่มี)
-python -c "import fastapi, uvicorn" 2>nul
+python -c "import fastapi, uvicorn, multipart" 2>nul
 if errorlevel 1 (
-  echo [setup] ติดตั้ง fastapi + uvicorn ครั้งแรก...
-  pip install fastapi uvicorn
+  echo [setup] ติดตั้ง fastapi + uvicorn + python-multipart ครั้งแรก...
+  pip install fastapi uvicorn python-multipart
 )
 
 start "" "http://localhost:%PORT%"

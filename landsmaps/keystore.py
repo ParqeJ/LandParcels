@@ -53,7 +53,19 @@ def save(path: Path = TOKEN_FILE, *, password: str | None = None, **fields: str)
     data = {**load(path), **{k: v for k, v in fields.items() if v is not None}}
     if password is not None:
         data["pass"] = password
-    data["saved_at"] = datetime.now().isoformat(timespec="seconds")
+    return _write(path, data)
+
+
+def remove(*fields: str, path: Path = TOKEN_FILE) -> Path:
+    """ลบ field ที่ระบุออก (เช่น "key" = ออกจากระบบ, "pass" = ลืมรหัสผ่าน) ไม่มี field นั้น -> ไม่แตะไฟล์"""
+    data = load(path)
+    if not any(f in data for f in fields):
+        return path
+    return _write(path, {k: v for k, v in data.items() if k not in fields})
+
+
+def _write(path: Path, data: dict[str, str]) -> Path:
+    data = {**data, "saved_at": datetime.now().isoformat(timespec="seconds")}
     ordered = {k: data[k] for k in FIELDS if k in data}
     ordered.update({k: v for k, v in data.items() if k not in FIELDS})
 

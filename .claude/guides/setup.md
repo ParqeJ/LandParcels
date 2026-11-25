@@ -87,7 +87,7 @@ LandParcels/
 
 - **`config.py`** — ค่าตั้งต้น ถ้าเปลี่ยน delay/URL ให้ยืนยันกับผู้ใช้ก่อน (อาจโดน rate limit)
 - **`api.py`** — มี logic cache + token refresh **อย่าแตะถ้าไม่จำเป็น**
-- **`export.py` (parcel)** — schema 14 ฟิลด์ **ห้ามเพิ่ม/ลบฟิลด์** โดยไม่ยืนยัน (จะทำให้ merge กับโปรเจกต์ CBD/BNN พัง)
+- **`export.py` (parcel)** — **ค่าเริ่มต้นของ preset ANIS POWER ต้องคง 14 ฟิลด์** (merge กับ CBD/BNN) — ผู้ใช้ปรับเองได้ในหน้า ตั้งค่าผลลัพธ์
 - **`cityplanning/export.py`** — schema 12 ฟิลด์ของผังเมือง แยกจาก parcel **ห้ามปน**
 - **`zones.py`** — EPSG 24047/24048 **ห้ามเปลี่ยน**
 

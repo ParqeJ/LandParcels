@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parent.parent
 AREAS_DIR = ROOT / "areas"        # วางไฟล์ขอบเขตพื้นที่ที่นี่
 OUTPUT_DIR = ROOT / "output"
 CACHE_DIR = ROOT / "cache"
+SCHEMA_DIR = ROOT / "schema"      # catalog_*.json + user_schema.json (ตั้งค่าผลลัพธ์จาก dashboard)
+USER_SCHEMA_FILE = SCHEMA_DIR / "user_schema.json"  # ไม่มี/ไม่มี base_fields = preset เดิม (14/12 ฟิลด์)
 
 # access_token ของบัญชี LandsMaps (อายุ 24 ชม.) ไม่มี -> ใช้แบบไม่ล็อกอิน (โควตาน้อยกว่า)
 TOKEN_FILE = ROOT / "Access_Key.txt"
@@ -46,6 +48,7 @@ TIMEOUT = 120
 MAX_COUNT = 60_000          # จำนวนแปลงสูงสุดต่อ 1 คำขอ WFS
 RETRY_WAITS = (5, 15, 45)
 LOG_EVERY = 100
+STATUS_EVERY = 10           # อัปเดต cache/status/<name>.json ทุกกี่แปลง (ให้ dashboard เห็นความคืบหน้า)
 # โควตาค้นรายละเอียด/วัน ไม่ใช่ตัวเลขตายตัว (เว็บแจ้ง 20 แต่ใช้จริงได้มากกว่า) ใช้แค่แสดงผล
 FREE_QUOTA = "ประมาณ 20-40"       # ไม่ล็อกอิน
 LOGIN_QUOTA = "ประมาณ 200-400"    # ใช้ access token ของบัญชี
