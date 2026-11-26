@@ -410,9 +410,29 @@ _PROGRESS_PATTERNS = [
     re.compile(r"(?P<n>\d+)\s*/\s*(?P<total>\d+)\s*(parcels|แปลง|features)", re.I),
     re.compile(r"(?P<pct>\d+(?:\.\d+)?)\s*%"),
 ]
+# บรรทัดของ fetch_parcels.py: "    100/1,340  เหลือ 1,240 แปลง -> ~4-7 วัน"
+# (มี , คั่นหลักพัน แพตเทิร์นทั่วไปด้านบนจึงจับไม่ได้)
+_PARCEL_PROGRESS = re.compile(
+    r"(?P<n>[\d,]+)\s*/\s*(?P<total>[\d,]+)\s+เหลือ\s+[\d,]+\s*แปลง\s*->\s*(?P<days>.+?)\s*$")
+# "โควตา 200-400 แปลง/วัน -> ต้องรันอีก ~4-7 วัน" (ก่อนเริ่มยิงแปลงแรก)
+_DAYS_ONLY = re.compile(r"ต้องรันอีก\s+(?P<days>.+?)\s*$")
+
+
+def _plain_int(text: str) -> int:
+    return int(text.replace(",", ""))
 
 
 def _parse_progress(line: str) -> dict[str, Any] | None:
+    """อ่านความคืบหน้าจาก log 1 บรรทัด — จำนวนวันเอาข้อความที่ pipeline คำนวณไว้แล้วมาใช้ตรง ๆ"""
+    m = _PARCEL_PROGRESS.search(line)
+    if m:
+        n, total = _plain_int(m["n"]), _plain_int(m["total"])
+        if total <= 0:
+            return {"days": m["days"]}
+        return {"n": n, "total": total, "percent": round(n * 100 / total, 1), "days": m["days"]}
+    m = _DAYS_ONLY.search(line)
+    if m:
+        return {"days": m["days"]}
     for rx in _PROGRESS_PATTERNS:
         m = rx.search(line)
         if not m:

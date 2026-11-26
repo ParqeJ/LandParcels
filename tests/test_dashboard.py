@@ -481,3 +481,17 @@ def test_docs_rejects_outside_or_bad_names(client, docs_root, name, status):
     r = client.get(f"/api/docs/{name}")
     assert r.status_code in (status, 404)
     assert "ห้ามเห็น" not in r.text
+
+
+# ─────────── อ่าน "จำนวนวัน" จาก log ของ fetch_parcels.py ───────────
+
+@pytest.mark.parametrize("line, expected", [
+    ("    100/1,340  เหลือ 1,240 แปลง -> ~4-7 วัน",
+     {"n": 100, "total": 1340, "percent": 7.5, "days": "~4-7 วัน"}),
+    ("    1,340/1,340  เหลือ 0 แปลง -> ครบแล้ว",
+     {"n": 1340, "total": 1340, "percent": 100.0, "days": "ครบแล้ว"}),
+    ("    โควตา 200-400 แปลง/วัน -> ต้องรันอีก ~4-7 วัน", {"days": "~4-7 วัน"}),
+    ("  -> output/t/t_parcel_epsg24047.shp: 73 แปลง", None),
+])
+def test_parse_progress_reads_days_from_the_log(line, expected):
+    assert server._parse_progress(line) == expected

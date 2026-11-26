@@ -80,6 +80,15 @@ python -m uvicorn dashboard.server:app --host 127.0.0.1 --port 8765
 | ⚠ หยุดกลางทาง | ไฟล์สถานะบอกว่ารันอยู่ แต่ process ไม่อยู่แล้ว (ปิดหน้าต่าง / ไฟดับ / กด Cancel) | รันใหม่ — ทำต่อจาก cache |
 | ✗ ผิดพลาด | พื้นที่นั้นพัง (ชี้เมาส์ดูสาเหตุ) | แก้ตามสาเหตุแล้วรันใหม่ |
 
+#### ต้องรันอีกกี่วัน
+
+ทุกแถวที่ยังมีแปลงค้างจะต่อท้ายด้วย **จำนวนวันที่ต้องรันอีก** เช่น `2,197/2,640 · ค้าง 443 · ~2-3 วัน` (ชี้เมาส์ดูโควตาที่ใช้คำนวณ) หน้า **📊 Monitor** ก็มีบรรทัดเดียวกันใต้ progress bar
+
+- นับเป็น**วัน** ไม่ใช่นาที เพราะ 1 วันรันจริงแค่ไม่กี่นาทีแล้วก็ติดโควตา — ตัวที่กำหนดว่างานจะเสร็จเมื่อไหร่คือ **โควตาต่อวัน**
+- สูตร: เหลือกี่แปลง ÷ โควตา/วัน (เร็วสุด = หารด้วยโควตาสูงสุด, ช้าสุด = หารด้วยโควตาต่ำสุด)
+- โควตาที่ใช้คือของสถานะล็อกอินตอนนี้: ล็อกอินแล้ว 200-400 แปลง/วัน · ยังไม่ล็อกอิน 20-40 แปลง/วัน → **ล็อกอินแล้วตัวเลขวันจะลดลงทันที**
+- กำลังดึงอยู่ = นับจากที่เหลือในรอบนี้ · ✅ ครบ = ไม่แสดง
+
 - พื้นที่ที่ดึงไว้**ก่อน**มีระบบนี้ (ไม่มีไฟล์สถานะ) → นับจาก `output/<ชื่อ>/<ชื่อ>_parcel_*.shp` แทน (ฟิลด์ `Remark = ยังไม่ได้ดึงรายละเอียด`) — ชี้เมาส์จะบอกว่านับจาก shapefile
 - รันด้วย `--name` → จับคู่ตามชื่อไฟล์ input ที่บันทึกไว้ในสถานะ (ใช้รอบล่าสุด)
 - ไฟล์สถานะเป็น JSON เล็ก ๆ ลบทิ้งได้ไม่เสียอะไร (ไม่ใช่ cache รายละเอียด ไม่เสียโควตา)
@@ -176,14 +185,14 @@ docs/dashboard.md    (ไฟล์นี้ — คู่มือรวมอ�
 | Method | Path | ใช้ทำ |
 |---|---|---|
 | GET | `/` | serve `index.html` |
-| GET | `/api/auth/status` | สถานะบัญชี: `logged_in`, `user` (mask), `expires_at`, `remaining_sec`, `remembered`, `quota` |
+| GET | `/api/auth/status` | สถานะบัญชี: `logged_in`, `user` (mask), `expires_at`, `remaining_sec`, `remembered`, `quota` (ข้อความ), `quota_range` (`[ต่ำสุด, สูงสุด]` แปลง/วัน) |
 | POST | `/api/auth/login` | `{user, password, remember}` → ล็อกอิน DGA · body ว่าง = ต่ออายุด้วยบัญชีที่จำไว้ |
 | POST | `/api/auth/logout` | `{forget}` → ลบ token (+ ลืมบัญชีถ้า `forget: true`) |
 | GET | `/api/areas` | list `areas/` |
 | POST | `/api/areas/delete` | `{names: [...]}` → ย้ายไป `areas/.deleted/<เวลา>/` (409 ถ้า job ยังใช้อยู่ / ไฟล์ถูกล็อก) |
 | POST | `/api/areas/upload` | multipart `files[]`, `overwrite` → เก็บลง `areas/` + ตรวจอ่านได้ (409 ถ้าชื่อซ้ำ) |
 | GET | `/api/areas/{name}/geojson` | ขอบเขต (EPSG:4326) สำหรับ Leaflet — อ่านด้วย `landsmaps.area.read_polygons` |
-| GET | `/api/status/areas` | สถานะการดึงรายไฟล์ใน `areas/` — อ่าน `cache/status/*.json` (ไม่มี → นับจาก shp ใน `output/`) อ่านอย่างเดียว |
+| GET | `/api/status/areas` | สถานะการดึงรายไฟล์ใน `areas/` — อ่าน `cache/status/*.json` (ไม่มี → นับจาก shp ใน `output/`) อ่านอย่างเดียว · แต่ละรายการมี `days` (ต้องรันอีกกี่วัน, `null` = ครบ/ไม่รู้) และระดับบนมี `quota` = `[ต่ำสุด, สูงสุด]` แปลง/วัน |
 | GET | `/api/catalog/{parcel\|cityplanning}` | `schema/catalog_*.json` |
 | GET/POST | `/api/user-schema` | อ่าน/เขียน `schema/user_schema.json` — 400 `{message, problems[]}` ถ้าชื่อว่าง/เกิน 10/ซ้ำ/ชนฟิลด์มาตรฐาน |
 | GET | `/api/docs` | รายการคู่มือ `[{name, title}]` (`index` = README.md) |

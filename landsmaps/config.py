@@ -49,9 +49,12 @@ MAX_COUNT = 60_000          # จำนวนแปลงสูงสุดต�
 RETRY_WAITS = (5, 15, 45)
 LOG_EVERY = 100
 STATUS_EVERY = 10           # อัปเดต cache/status/<name>.json ทุกกี่แปลง (ให้ dashboard เห็นความคืบหน้า)
-# โควตาค้นรายละเอียด/วัน ไม่ใช่ตัวเลขตายตัว (เว็บแจ้ง 20 แต่ใช้จริงได้มากกว่า) ใช้แค่แสดงผล
-FREE_QUOTA = "ประมาณ 20-40"       # ไม่ล็อกอิน
-LOGIN_QUOTA = "ประมาณ 200-400"    # ใช้ access token ของบัญชี
+# โควตาค้นรายละเอียด/วัน (ต่ำสุด, สูงสุด) ไม่ใช่ตัวเลขตายตัว (เว็บแจ้ง 20 แต่ใช้จริงได้มากกว่า)
+# ใช้แสดงผล + ประมาณว่าต้องรันอีกกี่วัน — ตัวคุมงานจริงคือโควตาต่อวัน ไม่ใช่เวลารันในเครื่อง
+FREE_QUOTA_RANGE = (20, 40)         # ไม่ล็อกอิน
+LOGIN_QUOTA_RANGE = (200, 400)      # ใช้ access token ของบัญชี
+FREE_QUOTA = f"ประมาณ {FREE_QUOTA_RANGE[0]}-{FREE_QUOTA_RANGE[1]}"
+LOGIN_QUOTA = f"ประมาณ {LOGIN_QUOTA_RANGE[0]}-{LOGIN_QUOTA_RANGE[1]}"
 
 # ไฟล์ขอบเขตที่อ่านได้ (และโฟลเดอร์ .gdb)
 AREA_SUFFIXES = (".kmz", ".kml", ".shp", ".gpkg", ".geojson", ".json")

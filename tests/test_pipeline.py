@@ -9,7 +9,7 @@ from shapely.geometry import box
 from landsmaps import pipeline
 from landsmaps.api import load_detail_cache
 from landsmaps.area import Area
-from landsmaps.pipeline import fetch_details, needs_detail
+from landsmaps.pipeline import days_left, fetch_details, needs_detail, quota_for
 from landsmaps.probe import Probe, probe_parcels
 from landsmaps.zones import Zone
 
@@ -139,3 +139,36 @@ def test_cached_parcel_is_skipped_and_quota_hit_stops_the_run(tmp_path):
 
     assert stopped is True
     assert len(records(cache)) == 1                 # แปลงที่ 1 ข้ามไป แปลงที่ 2 ยิงไม่สำเร็จ
+
+
+# ─────────── ประมาณการเป็น "จำนวนวัน" ไม่ใช่นาที (ตัวคุมคือโควตาต่อวัน) ───────────
+
+@pytest.mark.parametrize("remaining, quota, expected", [
+    (1_340, (200, 400), "~4-7 วัน"),     # 1340/400 = 4 วันเร็วสุด, 1340/200 = 7 วันช้าสุด
+    (73, (20, 40), "~2-4 วัน"),
+    (34, (200, 400), "~1 วัน"),          # น้อยกว่าโควตาขั้นต่ำ -> วันเดียวจบทั้งสองกรณี
+    (1, (20, 40), "~1 วัน"),
+    (0, (200, 400), "ครบแล้ว"),
+])
+def test_days_left_counts_days_from_daily_quota(remaining, quota, expected):
+    assert days_left(remaining, quota) == expected
+
+
+def test_quota_for_uses_account_quota_only_when_there_is_a_token():
+    assert quota_for("eyJhbGciOi...") == (200, 400)
+    assert quota_for("") == (20, 40)
+
+
+def test_progress_log_reports_days_not_minutes(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(pipeline, "LOG_EVERY", 1)
+    cache = tmp_path / "t_detail.jsonl"
+    gdf = parcels(box(E, N, E + 100, N + 100), box(E + 200, N, E + 300, N + 100))
+    api = FakeAPI([{"parcel_seq": "1"}, {"parcel_seq": "2"}])
+
+    fetch_details(gdf, area_47(), cache, api, probe_parcels(gdf), quota=(20, 40))
+
+    out = capsys.readouterr().out
+    assert "นาที" not in out
+    assert "โควตา 20-40 แปลง/วัน -> ต้องรันอีก ~1 วัน" in out
+    assert "1/2  เหลือ 1 แปลง -> ~1 วัน" in out
+    assert "2/2  เหลือ 0 แปลง -> ครบแล้ว" in out

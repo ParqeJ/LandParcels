@@ -7,6 +7,7 @@ const S = {
   areas: [], selectedArea: null,
   provinces: [], pickedProvs: [],
   jobs: [],
+  quota: null,                  // [ต่ำสุด, สูงสุด] แปลง/วัน จาก /api/status/areas (ไว้อธิบายจำนวนวัน)
   currentJob: null,
   monEvents: null,
   maps: { area: null, mon: null },
@@ -140,14 +141,18 @@ S.areaStatus = new Map();
 
 async function loadAreaStatus(){
   try{
-    const { items } = await api('/status/areas');
+    const { items, quota } = await api('/status/areas');
     S.areaStatus = new Map(items.map(it=>[it.area, it]));
+    if(Array.isArray(quota) && quota.length===2) S.quota = quota;
   }catch(e){
     S.areaStatus = new Map();
     $('#areaStatus').textContent = 'อ่านสถานะการดึงไม่สำเร็จ: ' + e.message;
   }
   renderAreaStatus();
 }
+
+/** " — โควตา 200-400 แปลง/วัน" (ว่างถ้ายังไม่รู้โควตา) */
+const quotaNote = ()=> S.quota ? ` — โควตา ${S.quota[0]}-${S.quota[1]} แปลง/วัน` : '';
 
 /** แปลงสถานะ 1 พื้นที่ -> {badge, bar(0-100|null), text, tip} */
 function describeFetch(st){
@@ -164,6 +169,8 @@ function describeFetch(st){
   }else if(done!=null){
     text = pending ? `${fmtN(done)}/${fmtN(total)} · ค้าง ${fmtN(pending)}` : `${fmtN(total)} แปลง`;
   }
+  if(st.days && text) text += ` · ${st.days}`;
+  if(st.days) tip = `ต้องรันอีก ${st.days}${quotaNote()} (1 วันรันจริงไม่กี่นาทีแล้วก็ติดโควตา)`;
   if(st.state==='quota') tip = 'โควตาวันนี้หมดแล้ว — รันใหม่หลังโควตารีเซ็ตจะทำต่อจาก cache';
   if(st.state==='partial') tip = 'ยังมีแปลงที่ไม่มีรายละเอียด — รันใหม่จะทำต่อจาก cache';
   if(st.state==='stale') tip = 'process หยุดไปก่อนจบ (ปิดหน้าต่าง/ไฟดับ/ถูก kill) — รันใหม่จะทำต่อจาก cache';
@@ -498,10 +505,13 @@ function appendLog(line){
   log.scrollTop = log.scrollHeight;
 }
 function updateProgress(p){
+  const days = p?.days ? `ต้องรันอีก ${p.days}${quotaNote()}` : '';
+  $('#monDays').textContent = days;
+  $('#monDays').hidden = !days;
   if(!p || p.percent==null){ $('#monPbar').classList.add('indet'); $('#monPct').textContent='—'; return; }
   $('#monPbar').classList.remove('indet');
   $('#monPbar').querySelector('.fill').style.width = Math.min(100,p.percent)+'%';
-  $('#monPct').textContent = `${p.percent.toFixed(1)}%${p.n!=null?' ('+p.n+'/'+p.total+')':''}`;
+  $('#monPct').textContent = `${p.percent.toFixed(1)}%${p.n!=null?` (${fmtN(p.n)}/${fmtN(p.total)})`:''}`;
 }
 let durTimer=null;
 function startDurationTicker(){

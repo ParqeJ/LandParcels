@@ -16,10 +16,11 @@ from . import user_schema
 from .api import (LandsMapsAPI, QuotaExceeded, check_token, is_match, load_detail_cache,
                   open_detail_cache, read_token)
 from .area import Area, area_name, load_area, safe_name
-from .config import CACHE_DIR, LOG_EVERY, OUTPUT_DIR, SLEEP_SEC, STATUS_EVERY
+from .config import CACHE_DIR, FREE_QUOTA_RANGE, LOG_EVERY, OUTPUT_DIR, SLEEP_SEC, STATUS_EVERY
 from .export import (NS3K, REMARK_PENDING, empty_row, ns3k_record, parcel_record, parcel_row,
                      to_shp, to_shp_layout)
 from .probe import Item, Probe, probe_parcels, summarize
+from .quota import Quota, days_left, quota_for
 from .status import write_status
 from .wfs import clip, fetch_features, find_sheets, parcel_items
 
@@ -79,6 +80,7 @@ def needs_detail(seq: str, details: dict, refetch: str) -> bool:
 
 def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: LandsMapsAPI,
                   probes: dict[str, Probe], *, refetch: str = "none",
+                  quota: Quota = FREE_QUOTA_RANGE,
                   on_progress: Progress | None = None) -> bool:
     """ขั้น 2: รายละเอียดโฉนดทีละแปลง ต่อท้าย cache_file คืน True ถ้าต้องหยุดก่อนครบ (โควตาเต็ม/เน็ตล่ม)"""
     details = load_detail_cache(cache_file)
@@ -87,9 +89,10 @@ def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: 
     again = sum(1 for row in todo if str(row.parcel_seq) in details)
     note = f" (ในนั้นเป็นการดึงซ้ำด้วยจุดใหม่ {again:,})" if again else ""
     print(f"  รายละเอียด: มี cache {len(details):,} แปลง  เหลือ {len(todo):,} แปลง{note}")
+    if todo:
+        print(f"    โควตา {quota[0]}-{quota[1]} แปลง/วัน -> ต้องรันอีก {days_left(len(todo), quota)}")
     report = on_progress or (lambda n, total: None)
     report(0, len(todo))
-    t0 = time.time()
     with open_detail_cache(cache_file) as fh:
         for i, row in enumerate(todo, 1):
             seq = str(row.parcel_seq)
@@ -115,8 +118,8 @@ def fetch_details(parcels: gpd.GeoDataFrame, area: Area, cache_file: Path, api: 
                 if is_match(seq, info):
                     break
             if i % LOG_EVERY == 0 or i == len(todo):
-                rate = (time.time() - t0) / i
-                print(f"    {i:,}/{len(todo):,}  เหลือ ~{rate * (len(todo) - i) / 60:.0f} นาที")
+                left = len(todo) - i
+                print(f"    {i:,}/{len(todo):,}  เหลือ {left:,} แปลง -> {days_left(left, quota)}")
             if i % STATUS_EVERY == 0 or i == len(todo):
                 report(i, len(todo))
             time.sleep(SLEEP_SEC)
@@ -199,7 +202,7 @@ def _run_area(path: Path, layer, name, fetch_detail: bool, refetch: str,
         token = read_token()
         print(f"  {check_token(token)}")
         quota_hit = fetch_details(geoms.parcel, area, cache_file, LandsMapsAPI(token), probes,
-                                  refetch=refetch,
+                                  refetch=refetch, quota=quota_for(token),
                                   on_progress=lambda n, todo: track(progress={"n": n, "todo": todo}))
 
     parcel_file, ns3k_file, out_parcel, out_ns3k, remark_col = export(geoms, area, cache_file, out_dir, probes)

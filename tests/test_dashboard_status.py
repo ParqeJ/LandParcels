@@ -102,3 +102,53 @@ def test_status_of_removed_area_is_not_listed(dash):
     _, _, cache, get = dash
     write_status(cache, "gone", state="done", source="gone.kmz")
     assert get() == {}
+
+
+# ─────────── จำนวนวันที่ต้องรันอีก (โควตา/วันเป็นตัวคุม ไม่ใช่เวลารัน) ───────────
+
+@pytest.fixture
+def no_login(monkeypatch):
+    """ไม่มี token -> โควตาแบบไม่ล็อกอิน 20-40 แปลง/วัน"""
+    monkeypatch.setattr(dstatus, "read_token", lambda: "")
+
+
+def test_pending_parcels_are_reported_as_days_with_the_current_quota(dash, no_login):
+    areas, _, cache, get = dash
+    touch_area(areas, "t.kmz")
+    write_status(cache, "t", state="quota", source="t.kmz", total=100, pending=73)
+
+    assert get()["t.kmz"]["days"] == "~2-4 วัน"          # 73 แปลง ÷ 20-40 แปลง/วัน
+
+
+def test_running_area_counts_days_from_what_is_left_in_this_round(dash, no_login):
+    areas, _, cache, get = dash
+    touch_area(areas, "t.kmz")
+    write_status(cache, "t", state="running", pid=os.getpid(), source="t.kmz",
+                 total=50, progress={"n": 10, "todo": 40})
+
+    assert get()["t.kmz"]["days"] == "~1-2 วัน"          # เหลือ 30 แปลงในรอบนี้
+
+
+def test_finished_area_has_no_day_estimate(dash, no_login):
+    areas, _, cache, get = dash
+    touch_area(areas, "t.kmz")
+    write_status(cache, "t", state="done", source="t.kmz", total=10, pending=0)
+
+    assert get()["t.kmz"]["days"] is None
+
+
+def test_quota_range_is_sent_so_the_page_can_explain_the_days(dash, no_login):
+    areas, _, _, _ = dash
+    touch_area(areas, "t.kmz")
+    client = TestClient(server.app, base_url="http://127.0.0.1:8765")
+
+    assert client.get("/api/status/areas").json()["quota"] == [20, 40]
+
+
+def test_account_quota_is_used_when_a_token_is_present(dash, monkeypatch):
+    areas, _, cache, get = dash
+    monkeypatch.setattr(dstatus, "read_token", lambda: "eyJhbGciOi...")
+    touch_area(areas, "t.kmz")
+    write_status(cache, "t", state="partial", source="t.kmz", total=2000, pending=1340)
+
+    assert get()["t.kmz"]["days"] == "~4-7 วัน"          # 1,340 แปลง ÷ 200-400 แปลง/วัน

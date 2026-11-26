@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from landsmaps import config, keystore
 from landsmaps import login as lg
 from landsmaps.api import token_expiry
+from landsmaps.quota import quota_for
 
 logger = logging.getLogger("dashboard.auth")
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -82,6 +83,7 @@ def _status() -> dict[str, Any]:
         "expired": expired,
         "remembered": creds is not None,
         "quota": config.LOGIN_QUOTA if logged_in else config.FREE_QUOTA,
+        "quota_range": list(quota_for(tok if logged_in else "")),
     }
 
 
@@ -91,7 +93,8 @@ def status() -> dict[str, Any]:
         return _status()
     except keystore.KeyFileError as e:
         return {"provider": PROVIDER, "logged_in": False, "error": str(e),
-                "remembered": False, "quota": config.FREE_QUOTA}
+                "remembered": False, "quota": config.FREE_QUOTA,
+                "quota_range": list(config.FREE_QUOTA_RANGE)}
 
 
 @router.post("/login")
