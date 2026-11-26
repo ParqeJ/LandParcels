@@ -38,6 +38,7 @@ LandParcels/
 │   ├── area.py                   อ่านไฟล์ขอบเขต → polygon + เลือก zone
 │   ├── zones.py                  zone 47/48 config
 │   ├── wfs.py                    ขั้น 1 (parcel): หาระวาง + รูปแปลง
+│   ├── probe.py                  เลือกจุดค้นลึกสุด (ตัดส่วนที่แปลงอื่นทับ) ก่อนขั้น 2
 │   ├── api.py                    ขั้น 2 (parcel): รายละเอียดรายแปลง + cache
 │   ├── export.py                 ขั้น 3 (parcel): 14 attributes → Shapefile
 │   ├── pipeline.py               รวม 3 ขั้นของ parcel

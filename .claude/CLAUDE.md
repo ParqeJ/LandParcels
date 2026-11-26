@@ -34,7 +34,7 @@ Python tool ดึง **แปลงที่ดินโฉนด + น.ส.3�
 4. **ห้ามเปลี่ยน CRS** `zones.py` (EPSG 24047/24048 เท่านั้น)
 5. **`LandusePlan` / `PLLU`** ใน code คือชื่อ URL/service จริงของกรมที่ดิน — ห้ามเปลี่ยน
 
-รายละเอียดเต็มอยู่ใน [guides/setup.md](guides/setup.md)
+รายละเอียดเต็มอยู่ใน [../docs/setup.md](../docs/setup.md) — `guides/` เป็นฉบับย่อสำหรับ Claude, `docs/` คือฉบับเต็ม (รวม dashboard/schema)
 
 ---
 

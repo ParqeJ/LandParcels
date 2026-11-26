@@ -2,7 +2,7 @@
 
 > Feature คู่กับ parcel: `fetch_cityplanning.py` → Shapefile/GPKG ผังเมือง
 > กลับไปที่สารบัญ: [CLAUDE.md](../CLAUDE.md) · โฟลเดอร์คู่: [setup.md](setup.md) · [parcel.md](parcel.md)
-> README ผู้ใช้: [CITYPLANNING_README.md](../../CITYPLANNING_README.md)
+> README ผู้ใช้: [README.md](../../README.md) · ฉบับเต็ม: [../../docs/cityplanning.md](../../docs/cityplanning.md)
 
 เดิมชื่อ feature "landuse" — rename เป็น "cityplanning" ทั้งโมดูล/ไฟล์/path แล้ว (`landsmaps/cityplanning/`, `output/cityplanning/`)
 

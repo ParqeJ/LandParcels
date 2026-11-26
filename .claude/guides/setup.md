@@ -2,6 +2,7 @@
 
 > คู่มือการติดตั้ง + กฎความปลอดภัยทั่วไปของ LandParcels
 > กลับไปที่สารบัญ: [CLAUDE.md](../CLAUDE.md) · โฟลเดอร์คู่: [parcel.md](parcel.md) · [cityplanning.md](cityplanning.md)
+> ⚠️ ฉบับย่อสำหรับ Claude — รายละเอียดเต็ม (รวม dashboard + schema) ดู [../../docs/setup.md](../../docs/setup.md)
 
 ---
 
@@ -17,6 +18,10 @@ LandParcels/
 ├── search_parcel.py              ค้นแปลงจากเลขโฉนด
 ├── Program_fetch_parcel.cmd      (Windows) double-click รันแปลงที่ดิน
 ├── Program_fetch_cityplanning.cmd (Windows) double-click รันผังเมือง
+├── open_dashboard.bat            (Windows) double-click เปิด Dashboard
+│
+├── dashboard/                    Web UI local (FastAPI) — ดู docs/dashboard.md
+├── schema/                       catalog ฟิลด์ + user_schema.json — ดู docs/schema.md
 │
 ├── .env                          (gitignore) บัญชี DGA
 ├── Access_Key.txt                (gitignore) token JSON
@@ -29,6 +34,7 @@ LandParcels/
 │   ├── area.py                   อ่านไฟล์ขอบเขต → polygon + เลือก zone
 │   ├── zones.py                  zone 47/48 config
 │   ├── wfs.py                    ขั้น 1 (parcel): หาระวาง + รูปแปลง
+│   ├── probe.py                  เลือกจุดค้นลึกสุด (ตัดส่วนที่แปลงอื่นทับ) ก่อนขั้น 2
 │   ├── api.py                    ขั้น 2 (parcel): รายละเอียดรายแปลง + cache
 │   ├── export.py                 ขั้น 3 (parcel): 14 attributes → Shapefile
 │   ├── pipeline.py               รวม 3 ขั้นของ parcel
@@ -100,3 +106,11 @@ LandParcels/
 ### 7. Dependencies
 
 - ถ้าจะเพิ่ม package ให้ update `requirements.txt` ด้วย และยืนยันว่า package รองรับ Windows + conda-forge
+- Dashboard ใช้เพิ่ม `fastapi`, `uvicorn`, `python-multipart` (test ใช้ `httpx`) — อยู่ในส่วน "ไม่บังคับ" ของ `requirements.txt`
+
+### 8. Dashboard
+
+- Claude **ห้ามกด Start / เข้าสู่ระบบ / อัปโหลดลง `areas/` จริงแทนผู้ใช้** (กฎเดียวกับข้อ 1)
+- server ผูกกับ `127.0.0.1` เท่านั้น — **อย่าเปลี่ยนเป็น `--host 0.0.0.0`** (จะเปิดให้คนในเครือข่ายสั่งล็อกอิน/รันได้)
+- API ห้ามส่งรหัสผ่าน/token เต็มกลับหน้าเว็บ (`auth.py` คืนแค่ชื่อบัญชี mask + วันหมดอายุ)
+- รายละเอียดเต็ม: [../../docs/setup.md](../../docs/setup.md) ข้อ 8 และ [../../docs/dashboard.md](../../docs/dashboard.md)
