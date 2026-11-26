@@ -7,7 +7,8 @@ from pathlib import Path
 import geopandas as gpd
 import requests
 from pyproj import CRS
-from shapely.geometry import shape
+from shapely.geometry import GeometryCollection, shape
+from shapely.ops import unary_union
 
 from .area import Area
 from .config import MAX_COUNT, TIMEOUT, WFS
@@ -80,10 +81,24 @@ def _read_cache(path: Path) -> dict | None:
         return None
 
 
+def _polygonal(g):
+    """คงเฉพาะส่วนที่เป็น polygon; ทิ้งเส้น/จุดที่ต้นทางหรือ buffer(0) ให้มา
+    (Shapefile เก็บได้ชนิดเดียว — LINESTRING/Point จะทำให้เขียนไฟล์ล้มทั้งไฟล์)"""
+    if g.is_empty or g.geom_type in ("Polygon", "MultiPolygon"):
+        return g
+    if isinstance(g, GeometryCollection):
+        polys = [p for p in g.geoms if p.geom_type in ("Polygon", "MultiPolygon")]
+        if polys:
+            return unary_union(polys)
+    return g.buffer(0)                  # LINESTRING/Point -> polygon ว่าง (ถูกตัดด้วย is_empty)
+
+
 def feature_geom(f: dict):
-    """รูปแปลงของ 1 feature ซ่อมรูปที่ไม่ valid ให้ใช้งานต่อได้"""
+    """รูปแปลงของ 1 feature ซ่อมรูปที่ไม่ valid และคงเฉพาะส่วนที่เป็น polygon"""
     g = shape(f["geometry"])
-    return g if g.is_valid else g.buffer(0)
+    if not g.is_valid:
+        g = g.buffer(0)
+    return _polygonal(g)
 
 
 def parcel_items(feats: list) -> list[tuple[str, object]]:
